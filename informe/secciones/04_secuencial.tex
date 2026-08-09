@@ -2,6 +2,8 @@
 
 La versión secuencial define la semántica de referencia y proporciona el tiempo base para calcular speedup.
 
+El esqueleto implementado separa la interfaz de línea de comandos, la configuración y el registro en módulos comunes bajo 	exttt{src/common}. El ejecutable 	exttt{schelling\_seq} carga valores predeterminados, aplica el archivo de escenario, incorpora las sobrescrituras indicadas por argumentos y valida la configuración efectiva antes de iniciar el modelo. Esta organización permite que el ejecutable híbrido reutilice exactamente la misma interpretación de entradas.
+
 \subsection{Estructuras de datos}
 
 \pendiente{describir arreglos de celdas, hogares, vacantes e índices espaciales implementados.}

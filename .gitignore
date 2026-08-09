@@ -10,6 +10,8 @@
 
 # Artefactos de compilación y ejecución.
 /build/
+/build-make/
+/build-sanitize/
 *.o
 *.a
 *.so

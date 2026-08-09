@@ -6,6 +6,8 @@
 
 El entorno local de desarrollo utiliza Ubuntu 24.04 x86-64, GCC y MPICH. El proyecto se construye principalmente con CMake y mantiene un Makefile portable para el entorno académico.
 
+La construcción de desarrollo habilita C11 y las advertencias 	exttt{-Wall}, 	exttt{-Wextra}, 	exttt{-Wpedantic}, 	exttt{-Wconversion} y 	exttt{-Wshadow}. Como controles complementarios se emplean 	exttt{clang-format}, 	exttt{cppcheck}, AddressSanitizer, UndefinedBehaviorSanitizer y Valgrind. Los comandos efectivos se conservan en el archivo 	exttt{README.md} del repositorio.
+
 \pendiente{documentar nodos, scheduler, compilador y bibliotecas de la infraestructura de FING.}
 
 Según el material del curso, MPI se habilita en FING mediante el módulo \texttt{mpi/mpich-x86\_64}; los binarios se compilan con \texttt{mpicc} y se ejecutan mediante \texttt{mpirun} con una lista o archivo de hosts. Esta información se verificará en las máquinas antes de realizar mediciones.
