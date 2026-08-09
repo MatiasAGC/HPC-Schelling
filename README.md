@@ -92,6 +92,18 @@ La automatización ejecuta un calentamiento y cinco repeticiones por defecto, va
 python3 scripts/ejecutar_experimentos.py --config config/base.conf --iteraciones 1
 ```
 
+En FING se puede indicar el archivo con los nombres de las máquinas:
+
+```bash
+python3 scripts/ejecutar_experimentos.py --config config/base.conf \
+    --secuencial build-make/schelling_seq \
+    --hibrido build-make/schelling_hybrid \
+    --salida results/fing --iteraciones 10 --hostfile mis_hosts \
+    --configuraciones 1x1,1x2,1x4,2x2,2x4,4x2,4x4
+```
+
+Cada línea de `mis_hosts` debe contener un nombre habilitado por el curso. Conviene realizar primero una ejecución corta con una repetición para estimar cuánto demorará la campaña completa.
+
 Los resultados crudos se guardan bajo `results/`, que está ignorado por Git. Se puede usar `config/mediana.conf` para una revisión rápida antes de reservar recursos de FING.
 
 Varios escenarios independientes pueden ejecutarse concurrentemente con un límite explícito de trabajos:

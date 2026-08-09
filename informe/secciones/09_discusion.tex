@@ -4,13 +4,13 @@
 
 La búsqueda de destinos domina el tiempo incluso después del índice espacial. El salto de uno a dos threads casi reduce a la mitad esa fase, mientras que cuatro threads en un único proceso no agregan mejora, posiblemente por ancho de banda, planificación del entorno virtualizado o por el trabajo serial de construcción de índices. La configuración $2\times4$ vuelve a reducir la búsqueda al repartir hogares primero por franjas MPI y luego entre threads.
 
-La eficiencia cae al aumentar recursos porque la preparación e índices se replican parcialmente y las colectivas operan sobre arreglos globales. Los 23,2~MB comunicados con dos procesos son pequeños frente al costo de búsqueda en esta máquina, pero crecerán con la grilla y la cantidad de procesos. Las mediciones en FING permitirán separar efectos propios de WSL2 y evaluar escalabilidad entre nodos.
+Al agregar recursos, una parte del trabajo sigue repitiéndose en todos los procesos y también aumenta el intercambio de datos. Por eso el tiempo no disminuye en la misma proporción. Los 23,2~MB comunicados con dos procesos son pequeños frente al costo de búsqueda en esta máquina, pero crecerán con la grilla y la cantidad de procesos. Las mediciones en FING permitirán saber cuánto mejora el programa al usar más de una máquina.
 
 El desbalance de 1,002 no justifica por ahora reemplazar las franjas uniformes por cortes dinámicos según población. Como extensión se priorizó el paralelismo entre escenarios: un coordinador ejecuta configuraciones independientes concurrentemente, limita la cantidad de trabajos y combina sus resúmenes. Esta capa resulta útil para sensibilidad y múltiples semillas sin introducir comunicación entre simulaciones.
 
-\subsection{Amenazas a la validez}
+\subsection{Factores que limitan los resultados}
 
-Se considerarán la simplificación espacial, la agregación socioeconómica, los parámetros hipotéticos de tolerancia, la calidad de los datos, la variabilidad de las mediciones y las diferencias entre plataformas.
+Los resultados dependen de la grilla simplificada, los datos sociales agrupados, los valores elegidos para las preferencias, la variación de los tiempos y las diferencias entre equipos.
 
 En particular, la grilla rectangular conserva relaciones abstractas de vecindad, pero no la forma urbana, la red vial, las distancias ni la distribución geográfica exacta de viviendas de Montevideo. Esta decisión mejora la claridad algorítmica y facilita la partición paralela, a costa de limitar la interpretación territorial de los resultados.
 

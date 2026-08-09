@@ -1,14 +1,14 @@
 \section{Diseño e implementación secuencial}
 
-La versión secuencial define la semántica de referencia y proporciona el tiempo base para calcular speedup.
+La versión secuencial define cómo debe comportarse el modelo y proporciona el tiempo base para calcular la mejora de la versión paralela.
 
-El esqueleto implementado separa la interfaz de línea de comandos, la configuración y el registro en módulos comunes bajo \texttt{src/common}. El ejecutable \texttt{schelling\_seq} carga valores predeterminados, aplica el archivo de escenario, incorpora las sobrescrituras indicadas por argumentos y valida la configuración efectiva antes de iniciar el modelo. Esta organización permite que el ejecutable híbrido reutilice exactamente la misma interpretación de entradas.
+El código separa la lectura de argumentos, la configuración y la escritura de resultados en módulos comunes bajo \texttt{src/common}. El ejecutable \texttt{schelling\_seq} carga valores iniciales, aplica el archivo del escenario, modifica los valores indicados por argumentos y revisa la configuración antes de iniciar. La versión paralela reutiliza este mismo código para interpretar las entradas de igual manera.
 
 \subsection{Estructuras de datos}
 
 La grilla y los hogares se almacenan en arreglos contiguos separados. El identificador global de una celda coincide con su posición en el arreglo y sigue un recorrido por filas; por ello las coordenadas se derivan mediante división y resto sin almacenarlas en cada celda. Cada celda conserva tipo, zona, precio e identificador del hogar ocupante. El valor centinela $-1$ representa una vivienda vacía, evitando mantener un segundo indicador de ocupación que pudiera contradecirlo.
 
-Los hogares conservan identificador, celda actual, subestrato, clase derivada, ingreso, bloqueo y satisfacción. Al crear o validar un estado se comprueba la correspondencia bidireccional entre hogar y celda, que una celda no residencial nunca esté ocupada y que cada hogar tenga exactamente una vivienda.
+Cada hogar guarda su identificador, celda actual, nivel social, clase, ingreso, bloqueo y satisfacción. Al revisar un estado se comprueba que el hogar y la celda se señalen entre sí, que una celda no residencial esté vacía y que cada hogar tenga exactamente una vivienda.
 
 \subsection{Funciones y organización del código}
 

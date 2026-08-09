@@ -21,6 +21,7 @@ def leerArgumentos():
     parser.add_argument("--calentamientos", type=int, default=1)
     parser.add_argument("--repeticiones", type=int, default=5)
     parser.add_argument("--configuraciones", default="1x1,1x2,1x4,2x2,2x4")
+    parser.add_argument("--hostfile", default="")
     return parser.parse_args()
 
 
@@ -107,7 +108,10 @@ def main():
 
     ejecuciones = [("secuencial", 1, 1, [argumentos.secuencial] + comun)]
     for procesos, threads in configuraciones:
-        comando = ["mpirun", "-np", str(procesos), argumentos.hibrido] + comun
+        comando = ["mpirun", "-np", str(procesos)]
+        if argumentos.hostfile:
+            comando.extend(["-hostfile", argumentos.hostfile])
+        comando.extend([argumentos.hibrido] + comun)
         ejecuciones.append((f"mpi{procesos}_omp{threads}", procesos, threads, comando))
 
     resultados = {}

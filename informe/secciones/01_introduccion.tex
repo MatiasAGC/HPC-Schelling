@@ -1,12 +1,12 @@
 \section{Introducción}
 
-La segregación residencial es un fenómeno emergente en el que numerosas decisiones locales pueden producir distribuciones espaciales globales marcadas. El modelo de Schelling muestra cómo preferencias individuales moderadas pueden generar segregación a escala colectiva \cite{schelling1971}.
+La segregación residencial puede aparecer a partir de muchas decisiones individuales sobre dónde vivir. El modelo de Schelling muestra que incluso preferencias moderadas pueden producir zonas muy separadas a nivel general \cite{schelling1971}.
 
 Este proyecto adapta el modelo a una representación simplificada de Montevideo e incorpora factores sociales y económicos. Su escala y la necesidad de evaluar múltiples escenarios motivan el uso de computación de alto desempeño.
 
 \subsection{Objetivos y contribuciones}
 
-Las contribuciones son una especificación reproducible del modelo, una implementación secuencial de referencia, una versión híbrida MPI/OpenMP, checkpoints portables entre ambas versiones, validación por hashes e invariantes y herramientas para automatizar experimentos y ejecutar escenarios independientes con concurrencia controlada. La evaluación compara corrección y desempeño local; la escalabilidad entre nodos se medirá por separado en FING.
+El proyecto aporta una definición precisa del modelo, una versión secuencial de referencia y una versión paralela con MPI y OpenMP. También permite guardar y retomar una simulación, repetir experimentos con los mismos datos y ejecutar varios escenarios de forma controlada. Se compara que las dos versiones den el mismo resultado y se mide su tiempo de ejecución. Las pruebas entre varias máquinas se realizan en FING.
 
 \subsection{Motivación computacional}
 

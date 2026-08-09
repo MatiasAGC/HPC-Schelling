@@ -1,6 +1,6 @@
 \section{Diseño e implementación paralela}
 
-La solución híbrida combina el modelo SPMD de MPI con paralelismo de memoria compartida mediante OpenMP \cite{mpi,openmp}.
+La versión paralela combina procesos MPI con hilos OpenMP \cite{mpi,openmp}. MPI permite repartir el trabajo entre máquinas o procesos, mientras que OpenMP aprovecha varios núcleos dentro de cada proceso.
 
 \subsection{Descomposición con MPI}
 
@@ -10,7 +10,7 @@ Para preservar una referencia distribuida sencilla durante la validación, todos
 
 \subsection{Comunicación y migraciones}
 
-La satisfacción y los precios producidos por cada dueño se combinan mediante \texttt{MPI\_Allreduce}; como cada elemento tiene un único productor, las sumas reconstruyen la instantánea global sin ambigüedad numérica. Las propuestas de destino usan el mismo esquema con el centinela $-1$. Cada proceso resuelve luego los conflictos en orden global determinista y obtiene el mismo estado consolidado. Después de cada iteración, los vecinos intercambian sus filas de borde mediante \texttt{MPI\_Irecv}, \texttt{MPI\_Isend} y \texttt{MPI\_Waitall}. El tiempo de iteración registrado es el máximo obtenido con una reducción colectiva.
+Cada proceso calcula la satisfacción y los precios de su franja. Luego, \texttt{MPI\_Allreduce} reúne esos resultados para que todos tengan el mismo estado completo. Las propuestas de mudanza se reúnen de la misma manera y cada proceso resuelve los conflictos en el mismo orden. Al final de la iteración, los procesos vecinos intercambian las filas cercanas al borde mediante \texttt{MPI\_Irecv}, \texttt{MPI\_Isend} y \texttt{MPI\_Waitall}. Como una ejecución debe esperar al proceso más lento, el tiempo informado es el mayor tiempo entre todos los procesos.
 
 Una solicitud cuyo origen y destino pertenecen a franjas distintas se contabiliza como remota. La propiedad del hogar cambia implícitamente porque se vuelve a derivar de su nueva celda; no es necesario renumerarlo ni modificar su identificador global.
 

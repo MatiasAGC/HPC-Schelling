@@ -4,7 +4,7 @@
 
 El entorno local de desarrollo es WSL2 con Ubuntu 24.04 x86-64 sobre un AMD Ryzen 5 3600 de seis núcleos y doce threads, 7,7~GiB de memoria y 16~MiB de caché L3. Se utilizó GCC 13.3.0 y Open MPI 4.1.6. El proyecto se construye principalmente con CMake y mantiene un Makefile portable para el entorno académico.
 
-La construcción de desarrollo habilita C11 y las advertencias \texttt{-Wall}, \texttt{-Wextra}, \texttt{-Wpedantic}, \texttt{-Wconversion} y \texttt{-Wshadow}. Como controles complementarios se emplean \texttt{clang-format}, \texttt{cppcheck}, AddressSanitizer, UndefinedBehaviorSanitizer y Valgrind. Los comandos efectivos se conservan en el archivo \texttt{README.md} del repositorio.
+El programa se escribió en C11 y se compiló con advertencias estrictas. Durante el desarrollo también se revisaron el formato, posibles errores de memoria y usos incorrectos de variables. Los comandos principales de compilación y ejecución se conservan en el archivo \texttt{README.md}.
 
 \pendiente{documentar nodos, scheduler, compilador y bibliotecas de la infraestructura de FING.}
 

@@ -1,19 +1,15 @@
 \section{Validación funcional}
 
-La validación combina pruebas unitarias, escenarios manuales, invariantes de conservación, análisis de memoria y comparación de hashes por iteración.
+La validación comprueba las reglas principales del modelo y que las versiones secuencial y paralela produzcan el mismo resultado.
 
-\subsection{Casos de prueba}
+\subsection{Reglas del modelo}
 
-El Hito 0 incluye una prueba unitaria de carga de configuración y pruebas de integración para el inicio secuencial, el rechazo de argumentos desconocidos y el rechazo de archivos inexistentes. La prueba de arranque híbrido exige observar dos procesos MPI y dos threads OpenMP por proceso, evitando que una ejecución MPI degradada a procesos aislados produzca un falso positivo.
-
-Las pruebas cubren conversión entre identificadores y coordenadas, ocupación exclusiva, rechazo de celdas no residenciales, correspondencia entre hogares y viviendas, clases socioeconómicas, pesos gaussianos, exclusión de vacíos, proporciones ponderadas, aislamiento y límites inclusivos de las nueve tolerancias. También verifican vectores fijos de la mezcla pseudoaleatoria, separación de propósitos, uniformes en intervalo abierto, reproducción exacta del estado sintético y casos extremos de ocupación. La cobertura se completa con configuración y argumentos inválidos, cálculo económico, índice espacial de vacantes, partición MPI, consolidación de conflictos, checkpoints íntegros e incompatibles, reinicio exacto, ejecución OpenMP y combinaciones híbridas. La suite contiene 21 pruebas automatizadas; se complementó con \texttt{cppcheck}, formato, AddressSanitizer, UndefinedBehaviorSanitizer y Valgrind. ThreadSanitizer no pudo inicializarse en WSL2 por un conflicto de mapeo de memoria con el entorno MPI, por lo que no se lo contabiliza como evidencia superada.
-
-Un escenario manual adicional enfrenta dos hogares de igual capacidad de pago por una única vacante. La prueba exige dos solicitudes, una aceptación, una sola ocupación del destino y conservación exacta de hogares y vacantes. Con ello se comprueba la consolidación síncrona y el desempate determinista básico.
+Se comprobaron las reglas de ocupación, vecindario, tolerancia, precio, capacidad de pago y permanencia mínima. Después de cada iteración se controla que no se pierdan ni dupliquen hogares, que una vivienda tenga como máximo un ocupante y que una celda no residencial permanezca vacía. También se estudió un caso en el que dos hogares solicitan la misma vivienda: solo uno debe mudarse y la cantidad total de hogares y viviendas vacías debe conservarse.
 
 \subsection{Equivalencia entre versiones}
 
-El escenario mínimo de $8\times6$ se ejecuta con uno, dos y tres procesos MPI y un thread por proceso, además de las combinaciones $1\times4$ y $2\times2$ de procesos por threads. En todos los casos los hashes de las iteraciones uno y dos son, respectivamente, \texttt{dceac07696c2ac27} y \texttt{7d65e8c90d52123b}, idénticos a la versión secuencial. La comparación es exacta, sin tolerancia numérica, porque cada celda y hogar se actualiza mediante las mismas operaciones y desempates deterministas. Las pruebas también cubren la partición completa de una altura no divisible por la cantidad de procesos y el recorte correcto de halos en los bordes.
+El escenario mínimo de $8\times6$ se ejecutó con uno, dos y tres procesos MPI, y también con las combinaciones de un proceso y cuatro hilos y de dos procesos y dos hilos. En todos los casos, el código de verificación de las dos primeras iteraciones fue igual al de la versión secuencial. La comparación es exacta porque las versiones aplican las mismas reglas y la misma forma de resolver empates. También se comprobó una grilla cuya altura no es divisible entre los procesos y el intercambio de filas en los bordes.
 
 \subsection{Checkpoint y reinicio}
 
-Una prueba ejecuta dos meses de un escenario por dos caminos: ejecución continua y guardado/restauración después del primer mes. Los hashes finales deben coincidir exactamente. La misma prueba rechaza una configuración incompatible y un archivo con bytes adicionales. En una validación de interfaz, la tercera iteración produjo el hash \texttt{f05d641603cbb009} tanto de forma continua como al reiniciar desde la segunda.
+Un escenario se ejecutó de dos formas: sin interrupciones y guardando el estado después del primer mes para continuarlo más tarde. Ambos caminos terminaron con el mismo resultado. El programa también rechaza un archivo alterado o creado con una configuración incompatible.
