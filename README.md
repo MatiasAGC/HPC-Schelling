@@ -4,7 +4,7 @@ Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segreg
 
 ## Estado
 
-La especificación funcional está cerrada y la implementación secuencial funcional del Hito 1 está disponible. Incluye generación sintética reproducible, vecindarios ponderados, satisfacción, precios, accesibilidad, solicitudes, conflictos y mudanzas síncronas. La búsqueda de destinos todavía es la referencia exhaustiva y se optimizará en el Hito 3.
+La especificación funcional está cerrada y están disponibles los hitos 1 y 2: simulación secuencial, generación reproducible, hashes por iteración, salidas CSV/JSON, checkpoints versionados y reinicio validado. La búsqueda de destinos todavía es la referencia exhaustiva y se optimizará en el Hito 3.
 
 Los documentos principales son:
 

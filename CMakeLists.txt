@@ -12,11 +12,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 add_library(schelling_comun STATIC
     src/common/aleatorio.c
     src/common/argumentos.c
+    src/common/checkpoint.c
     src/common/configuracion.c
     src/common/economia.c
     src/common/generador.c
+    src/common/hash.c
     src/common/modelo.c
     src/common/registro.c
+    src/common/salida.c
     src/common/vecindario.c
     src/sequential/simulacion.c
 )
@@ -53,6 +56,12 @@ if(BUILD_TESTING)
     )
     add_test(NAME configuracion COMMAND prueba_configuracion)
 
+    add_executable(prueba_checkpoint tests/unit/prueba_checkpoint.c)
+    target_link_libraries(prueba_checkpoint PRIVATE schelling_comun)
+    target_compile_options(prueba_checkpoint PRIVATE -Wall -Wextra -Wpedantic -Wconversion
+                                                        -Wshadow)
+    add_test(NAME checkpoint COMMAND prueba_checkpoint)
+
     add_executable(prueba_aleatorio tests/unit/prueba_aleatorio.c)
     target_link_libraries(prueba_aleatorio PRIVATE schelling_comun)
     target_compile_options(prueba_aleatorio PRIVATE -Wall -Wextra -Wpedantic -Wconversion
@@ -64,6 +73,11 @@ if(BUILD_TESTING)
     target_compile_options(prueba_generador PRIVATE -Wall -Wextra -Wpedantic -Wconversion
                                                       -Wshadow)
     add_test(NAME generador COMMAND prueba_generador)
+
+    add_executable(prueba_hash tests/unit/prueba_hash.c)
+    target_link_libraries(prueba_hash PRIVATE schelling_comun)
+    target_compile_options(prueba_hash PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+    add_test(NAME hash COMMAND prueba_hash)
 
     add_executable(prueba_economia tests/unit/prueba_economia.c)
     target_link_libraries(prueba_economia PRIVATE schelling_comun)

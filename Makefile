@@ -6,9 +6,9 @@ RELEASE_FLAGS := -O3 -DNDEBUG
 DEBUG_FLAGS := -O0 -g3
 OPENMP_FLAGS := -fopenmp
 BUILD_DIR := build-make
-COMMON_SOURCES := src/common/aleatorio.c src/common/argumentos.c src/common/configuracion.c \
-	src/common/economia.c src/common/generador.c src/common/modelo.c src/common/registro.c \
-	src/common/vecindario.c src/sequential/simulacion.c
+COMMON_SOURCES := src/common/aleatorio.c src/common/argumentos.c src/common/checkpoint.c src/common/configuracion.c \
+	src/common/economia.c src/common/generador.c src/common/hash.c src/common/modelo.c src/common/registro.c \
+	src/common/salida.c src/common/vecindario.c src/sequential/simulacion.c
 COMMON_OBJECTS := $(patsubst src/%.c,$(BUILD_DIR)/make/%.o,$(COMMON_SOURCES))
 VERSION := 0.1.0
 CPPFLAGS := -DSCHELLING_VERSION=\"$(VERSION)\"
@@ -40,6 +40,10 @@ $(BUILD_DIR)/prueba_configuracion: tests/unit/prueba_configuracion.c $(COMMON_OB
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) \
 		-DRUTA_CONFIGURACION_PRUEBA=\"tests/data/minima.conf\" $^ -lm -o $@
 
+$(BUILD_DIR)/prueba_checkpoint: tests/unit/prueba_checkpoint.c $(COMMON_OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) $^ -lm -o $@
+
 $(BUILD_DIR)/prueba_modelo: tests/unit/prueba_modelo.c $(COMMON_OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) $^ -lm -o $@
@@ -49,6 +53,10 @@ $(BUILD_DIR)/prueba_aleatorio: tests/unit/prueba_aleatorio.c $(COMMON_OBJECTS)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) $^ -lm -o $@
 
 $(BUILD_DIR)/prueba_generador: tests/unit/prueba_generador.c $(COMMON_OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) $^ -lm -o $@
+
+$(BUILD_DIR)/prueba_hash: tests/unit/prueba_hash.c $(COMMON_OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) $^ -lm -o $@
 
@@ -64,13 +72,16 @@ $(BUILD_DIR)/prueba_vecindario: tests/unit/prueba_vecindario.c $(COMMON_OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) $^ -lm -o $@
 
-test: debug $(BUILD_DIR)/prueba_configuracion $(BUILD_DIR)/prueba_aleatorio \
+test: debug $(BUILD_DIR)/prueba_configuracion $(BUILD_DIR)/prueba_checkpoint \
+	$(BUILD_DIR)/prueba_aleatorio \
 	$(BUILD_DIR)/prueba_economia $(BUILD_DIR)/prueba_generador $(BUILD_DIR)/prueba_modelo \
-	$(BUILD_DIR)/prueba_simulacion $(BUILD_DIR)/prueba_vecindario
+	$(BUILD_DIR)/prueba_hash $(BUILD_DIR)/prueba_simulacion $(BUILD_DIR)/prueba_vecindario
 	$(BUILD_DIR)/prueba_configuracion
+	$(BUILD_DIR)/prueba_checkpoint
 	$(BUILD_DIR)/prueba_aleatorio
 	$(BUILD_DIR)/prueba_economia
 	$(BUILD_DIR)/prueba_generador
+	$(BUILD_DIR)/prueba_hash
 	$(BUILD_DIR)/prueba_modelo
 	$(BUILD_DIR)/prueba_simulacion
 	$(BUILD_DIR)/prueba_vecindario

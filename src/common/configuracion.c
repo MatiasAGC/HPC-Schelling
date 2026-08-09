@@ -420,6 +420,13 @@ bool validarConfiguracion(const Configuracion *configuracion)
         return false;
     }
 
+    if (configuracion->frecuenciaCheckpoint < 0 || configuracion->cantidadCheckpoints <= 0 ||
+        configuracion->permanenciaMinima < 0)
+    {
+        registrarError("la configuracion de permanencia o checkpoints es invalida");
+        return false;
+    }
+
     if (configuracion->proporcionResidencial < 0.0 || configuracion->proporcionResidencial > 1.0 ||
         configuracion->proporcionOcupacion < 0.0 || configuracion->proporcionOcupacion > 1.0 ||
         configuracion->cantidadZonas <= 0)
