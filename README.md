@@ -4,7 +4,7 @@ Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segreg
 
 ## Estado
 
-La especificación funcional está cerrada y el Hito 0 de la implementación está completo. Ya existen los dos ejecutables, la carga y validación de configuración, el registro básico y las pruebas automáticas del esqueleto. La simulación del modelo se incorpora en el Hito 1.
+La especificación funcional está cerrada y la implementación secuencial funcional del Hito 1 está disponible. Incluye generación sintética reproducible, vecindarios ponderados, satisfacción, precios, accesibilidad, solicitudes, conflictos y mudanzas síncronas. La búsqueda de destinos todavía es la referencia exhaustiva y se optimizará en el Hito 3.
 
 Los documentos principales son:
 
@@ -57,7 +57,7 @@ ctest --test-dir build --output-on-failure -E hibrido
 OMP_NUM_THREADS=2 mpirun -np 2 ./build/schelling_hybrid --config config/base.conf --validate
 ```
 
-Los ejecutables del Hito 0 validan y muestran la configuración efectiva, pero todavía no ejecutan iteraciones del modelo.
+El ejecutable secuencial genera el estado inicial y ejecuta la cantidad configurada de iteraciones. El ejecutable híbrido conserva por ahora el arranque validado del Hito 0; la distribución MPI y OpenMP se incorpora en los hitos 4 y 5.
 
 Para consultar todas las opciones:
 

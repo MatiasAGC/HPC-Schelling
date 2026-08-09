@@ -14,6 +14,8 @@ La información municipal de la Intendencia basada en ECH 2023 se utilizará par
 
 Además del escenario de Montevideo se utilizan instancias sintéticas pequeñas y medianas para verificar reglas e invariantes. Toda generación registra la semilla y los parámetros efectivos.
 
+El generador recorre dos veces la grilla. En la primera pasada determina de forma reproducible cuáles celdas son residenciales y cuáles están ocupadas, obteniendo así la cantidad exacta de hogares para reservar arreglos contiguos. En la segunda construye celdas y hogares, asigna zonas mediante franjas verticales y selecciona subestratos con los pesos configurados. El escenario base usa proporción residencial 0,885 y ocupación 0,90; los conteos efectivos dependen de la semilla y se informan al iniciar cada ejecución.
+
 \subsection{Supuestos y limitaciones de los datos}
 
 \pendiente{documentar imputaciones y el procedimiento definitivo de agregación por municipio.}

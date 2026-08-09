@@ -1,6 +1,8 @@
 #ifndef SCHELLING_CONFIGURACION_H
 #define SCHELLING_CONFIGURACION_H
 
+#include "schelling/modelo.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -25,6 +27,11 @@ typedef struct
     double tasaAnual;
     int plazoMeses;
     bool ruidoHabilitado;
+    double proporcionResidencial;
+    double proporcionOcupacion;
+    int cantidadZonas;
+    double pesosSubestratos[CANTIDAD_SUBESTRATOS];
+    double tolerancias[CANTIDAD_CLASES][CANTIDAD_CLASES];
 } Configuracion;
 
 void iniciarConfiguracionPredeterminada(Configuracion *configuracion);

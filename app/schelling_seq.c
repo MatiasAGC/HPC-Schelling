@@ -1,6 +1,10 @@
 #include "schelling/argumentos.h"
 #include "schelling/configuracion.h"
+#include "schelling/generador.h"
+#include "schelling/modelo.h"
 #include "schelling/registro.h"
+#include "schelling/simulacion.h"
+#include "schelling/vecindario.h"
 
 #include <stdio.h>
 
@@ -26,6 +30,8 @@ int main(int argc, char **argv)
 {
     OpcionesPrograma opciones;
     Configuracion configuracion;
+    Modelo modelo = {0};
+    Vecindario vecindario = {0};
 
     iniciarOpcionesPrograma(&opciones);
 
@@ -63,6 +69,41 @@ int main(int argc, char **argv)
 
     registrarInformacion("inicio de la version secuencial");
     mostrarConfiguracion(&configuracion);
-    registrarInformacion("hito 0 completado sin ejecutar la simulacion");
+
+    if (!generarModeloSintetico(&configuracion, &modelo))
+    {
+        return 1;
+    }
+
+    registrarInformacion("estado sintetico con %d celdas %d viviendas %d hogares y %d vacias",
+                         modelo.cantidadCeldas, contarCeldasResidenciales(&modelo),
+                         modelo.cantidadHogares, contarViviendasVacias(&modelo));
+    if (!crearVecindario(&vecindario, configuracion.radioVecindario, configuracion.sigma))
+    {
+        liberarModelo(&modelo);
+        return 1;
+    }
+
+    for (int iteracion = 0; iteracion < configuracion.iteraciones; iteracion++)
+    {
+        MetricasIteracion metricas;
+
+        if (!ejecutarIteracion(&modelo, &vecindario, &configuracion, (uint64_t)iteracion,
+                               &metricas))
+        {
+            liberarVecindario(&vecindario);
+            liberarModelo(&modelo);
+            return 1;
+        }
+
+        registrarInformacion(
+            "iteracion %d satisfechos %d solicitudes %d aceptadas %d rechazadas %d sin destino %d",
+            iteracion + 1, metricas.satisfechos, metricas.solicitudes, metricas.aceptadas,
+            metricas.rechazadas, metricas.sinDestino);
+    }
+
+    registrarInformacion("simulacion secuencial completada");
+    liberarVecindario(&vecindario);
+    liberarModelo(&modelo);
     return 0;
 }

@@ -2,23 +2,27 @@
 
 La versión secuencial define la semántica de referencia y proporciona el tiempo base para calcular speedup.
 
-El esqueleto implementado separa la interfaz de línea de comandos, la configuración y el registro en módulos comunes bajo 	exttt{src/common}. El ejecutable 	exttt{schelling\_seq} carga valores predeterminados, aplica el archivo de escenario, incorpora las sobrescrituras indicadas por argumentos y valida la configuración efectiva antes de iniciar el modelo. Esta organización permite que el ejecutable híbrido reutilice exactamente la misma interpretación de entradas.
+El esqueleto implementado separa la interfaz de línea de comandos, la configuración y el registro en módulos comunes bajo \texttt{src/common}. El ejecutable \texttt{schelling\_seq} carga valores predeterminados, aplica el archivo de escenario, incorpora las sobrescrituras indicadas por argumentos y valida la configuración efectiva antes de iniciar el modelo. Esta organización permite que el ejecutable híbrido reutilice exactamente la misma interpretación de entradas.
 
 \subsection{Estructuras de datos}
 
-\pendiente{describir arreglos de celdas, hogares, vacantes e índices espaciales implementados.}
+La grilla y los hogares se almacenan en arreglos contiguos separados. El identificador global de una celda coincide con su posición en el arreglo y sigue un recorrido por filas; por ello las coordenadas se derivan mediante división y resto sin almacenarlas en cada celda. Cada celda conserva tipo, zona, precio e identificador del hogar ocupante. El valor centinela $-1$ representa una vivienda vacía, evitando mantener un segundo indicador de ocupación que pudiera contradecirlo.
+
+Los hogares conservan identificador, celda actual, subestrato, clase derivada, ingreso, bloqueo y satisfacción. Al crear o validar un estado se comprueba la correspondencia bidireccional entre hogar y celda, que una celda no residencial nunca esté ocupada y que cada hogar tenga exactamente una vivienda.
 
 \subsection{Funciones y organización del código}
 
-\pendiente{explicar las funciones principales, módulos y responsabilidades sin convertir el informe en un listado del código fuente.}
+El módulo de modelo administra memoria, coordenadas, definición de celdas, ubicación de hogares e invariantes. El generador sintético construye el estado inicial a partir de parámetros y claves aleatorias estables. El módulo de vecindario precalcula una sola vez los desplazamientos de Chebyshev y sus pesos gaussianos. Sobre esas tablas calcula proporciones ponderadas y evalúa las tolerancias cargadas desde el escenario. \pendiente{completar las responsabilidades de simulación, precios, mudanzas y métricas.}
 
 \subsection{Algoritmo}
 
-Cada iteración evalúa satisfacción sobre un estado inmutable, actualiza precios, genera solicitudes, resuelve conflictos y consolida las mudanzas. \pendiente{agregar pseudocódigo y análisis de complejidad.}
+Cada iteración evalúa satisfacción sobre la ocupación consolidada, actualiza solamente los precios de viviendas vacías y busca un destino para cada hogar insatisfecho no bloqueado. La búsqueda de referencia recorre todas las vacantes, descarta las inaccesibles o insatisfactorias y elige la de menor distancia, con identificador como desempate. Las solicitudes se almacenan sin modificar la grilla. Para cada vivienda se conserva el hogar de mayor ingreso; los empates usan una clave pseudoaleatoria estable y luego el identificador. Finalmente se liberan todos los orígenes ganadores y recién después se ocupan los destinos, por lo que una vivienda liberada no participa hasta el mes siguiente.
+
+Para $H$ hogares, $V$ viviendas vacías y $K$ desplazamientos del vecindario, esta referencia tiene costo dominante $O(HVK)$ en el peor caso. Esta versión prioriza una semántica comprobable; el índice espacial posterior reduce la cantidad de destinos examinados. \pendiente{agregar el pseudocódigo definitivo después de incorporar el índice espacial.}
 
 \subsection{Reproducibilidad y checkpoints}
 
-Las decisiones pseudoaleatorias se derivan de claves estables para no depender del orden de recorrido. \pendiente{documentar el generador y el formato final de checkpoint.}
+El generador pseudoaleatorio no mantiene estado mutable. Una mezcla SplitMix64 recibe una clave compuesta por semilla, iteración, identificador de entidad, propósito y número de muestra. Los 53 bits superiores del resultado se convierten a un valor uniforme en el intervalo abierto $(0,1)$. Separar los propósitos de tipo de celda, ocupación, subestrato, ruido y desempate evita que agregar una muestra a una fase desplace las secuencias de las restantes. Existen vectores de prueba fijos para la función de mezcla. \pendiente{documentar la transformación normal y el formato final de checkpoint.}
 
 En ejecuciones normales se genera un checkpoint cada 50 iteraciones y se conservan los dos últimos completos. La escritura usa archivos temporales y un manifiesto final para que un estado parcial no sea reiniciable. En los benchmarks los checkpoints se desactivan para evitar que la E/S altere la comparación de tiempos.
 
@@ -28,7 +32,7 @@ En ejecuciones normales se genera un checkpoint cada 50 iteraciones y se conserv
 
 \subsection{Convenciones y simplificaciones}
 
-La grilla rectangular es una abstracción y no un mapa de Montevideo. Cada celda residencial representa una vivienda discreta, sin superficie física asociada. Los datos oficiales se conservan como cantidades y distribuciones agregadas por zona. \pendiente{completar las convenciones de índices y representación numérica después de implementarlas.}
+La grilla rectangular es una abstracción y no un mapa de Montevideo. Cada celda residencial representa una vivienda discreta, sin superficie física asociada. Los datos oficiales se conservan como cantidades y distribuciones agregadas por zona. Los índices comienzan en cero, las celdas se ordenan por filas y los bordes son cerrados: todo desplazamiento exterior se descarta.
 
 \subsection{Dificultades de implementación}
 

@@ -10,12 +10,19 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_library(schelling_comun STATIC
+    src/common/aleatorio.c
     src/common/argumentos.c
     src/common/configuracion.c
+    src/common/economia.c
+    src/common/generador.c
+    src/common/modelo.c
     src/common/registro.c
+    src/common/vecindario.c
+    src/sequential/simulacion.c
 )
 
 target_include_directories(schelling_comun PUBLIC include)
+target_link_libraries(schelling_comun PUBLIC m)
 target_compile_definitions(schelling_comun PUBLIC SCHELLING_VERSION="${PROJECT_VERSION}")
 target_compile_options(schelling_comun PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 
@@ -45,6 +52,41 @@ if(BUILD_TESTING)
         RUTA_CONFIGURACION_PRUEBA="${CMAKE_SOURCE_DIR}/tests/data/minima.conf"
     )
     add_test(NAME configuracion COMMAND prueba_configuracion)
+
+    add_executable(prueba_aleatorio tests/unit/prueba_aleatorio.c)
+    target_link_libraries(prueba_aleatorio PRIVATE schelling_comun)
+    target_compile_options(prueba_aleatorio PRIVATE -Wall -Wextra -Wpedantic -Wconversion
+                                                      -Wshadow)
+    add_test(NAME aleatorio COMMAND prueba_aleatorio)
+
+    add_executable(prueba_generador tests/unit/prueba_generador.c)
+    target_link_libraries(prueba_generador PRIVATE schelling_comun)
+    target_compile_options(prueba_generador PRIVATE -Wall -Wextra -Wpedantic -Wconversion
+                                                      -Wshadow)
+    add_test(NAME generador COMMAND prueba_generador)
+
+    add_executable(prueba_economia tests/unit/prueba_economia.c)
+    target_link_libraries(prueba_economia PRIVATE schelling_comun)
+    target_compile_options(prueba_economia PRIVATE -Wall -Wextra -Wpedantic -Wconversion
+                                                     -Wshadow)
+    add_test(NAME economia COMMAND prueba_economia)
+
+    add_executable(prueba_simulacion tests/unit/prueba_simulacion.c)
+    target_link_libraries(prueba_simulacion PRIVATE schelling_comun)
+    target_compile_options(prueba_simulacion PRIVATE -Wall -Wextra -Wpedantic -Wconversion
+                                                        -Wshadow)
+    add_test(NAME simulacion COMMAND prueba_simulacion)
+
+    add_executable(prueba_modelo tests/unit/prueba_modelo.c)
+    target_link_libraries(prueba_modelo PRIVATE schelling_comun)
+    target_compile_options(prueba_modelo PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+    add_test(NAME modelo COMMAND prueba_modelo)
+
+    add_executable(prueba_vecindario tests/unit/prueba_vecindario.c)
+    target_link_libraries(prueba_vecindario PRIVATE schelling_comun)
+    target_compile_options(prueba_vecindario PRIVATE -Wall -Wextra -Wpedantic -Wconversion
+                                                       -Wshadow)
+    add_test(NAME vecindario COMMAND prueba_vecindario)
 
     add_test(NAME inicio_secuencial
         COMMAND schelling_seq --config "${CMAKE_SOURCE_DIR}/tests/data/minima.conf"

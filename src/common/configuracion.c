@@ -188,6 +188,82 @@ static bool asignarValor(Configuracion *configuracion, const char *clave, const 
     {
         return convertirEntero(valor, &configuracion->plazoMeses);
     }
+    if (strcmp(clave, "proporcionResidencial") == 0)
+    {
+        return convertirReal(valor, &configuracion->proporcionResidencial);
+    }
+    if (strcmp(clave, "proporcionOcupacion") == 0)
+    {
+        return convertirReal(valor, &configuracion->proporcionOcupacion);
+    }
+    if (strcmp(clave, "cantidadZonas") == 0)
+    {
+        return convertirEntero(valor, &configuracion->cantidadZonas);
+    }
+    if (strcmp(clave, "pesoSubestratoAMas") == 0)
+    {
+        return convertirReal(valor, &configuracion->pesosSubestratos[SUBESTRATO_A_MAS]);
+    }
+    if (strcmp(clave, "pesoSubestratoAMenos") == 0)
+    {
+        return convertirReal(valor, &configuracion->pesosSubestratos[SUBESTRATO_A_MENOS]);
+    }
+    if (strcmp(clave, "pesoSubestratoMMas") == 0)
+    {
+        return convertirReal(valor, &configuracion->pesosSubestratos[SUBESTRATO_M_MAS]);
+    }
+    if (strcmp(clave, "pesoSubestratoM") == 0)
+    {
+        return convertirReal(valor, &configuracion->pesosSubestratos[SUBESTRATO_M]);
+    }
+    if (strcmp(clave, "pesoSubestratoMMenos") == 0)
+    {
+        return convertirReal(valor, &configuracion->pesosSubestratos[SUBESTRATO_M_MENOS]);
+    }
+    if (strcmp(clave, "pesoSubestratoBMas") == 0)
+    {
+        return convertirReal(valor, &configuracion->pesosSubestratos[SUBESTRATO_B_MAS]);
+    }
+    if (strcmp(clave, "pesoSubestratoBMenos") == 0)
+    {
+        return convertirReal(valor, &configuracion->pesosSubestratos[SUBESTRATO_B_MENOS]);
+    }
+    if (strcmp(clave, "toleranciaAltaAlta") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_ALTA][CLASE_ALTA]);
+    }
+    if (strcmp(clave, "toleranciaAltaMedia") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_ALTA][CLASE_MEDIA]);
+    }
+    if (strcmp(clave, "toleranciaAltaBaja") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_ALTA][CLASE_BAJA]);
+    }
+    if (strcmp(clave, "toleranciaMediaAlta") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_MEDIA][CLASE_ALTA]);
+    }
+    if (strcmp(clave, "toleranciaMediaMedia") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_MEDIA][CLASE_MEDIA]);
+    }
+    if (strcmp(clave, "toleranciaMediaBaja") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_MEDIA][CLASE_BAJA]);
+    }
+    if (strcmp(clave, "toleranciaBajaAlta") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_BAJA][CLASE_ALTA]);
+    }
+    if (strcmp(clave, "toleranciaBajaMedia") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_BAJA][CLASE_MEDIA]);
+    }
+    if (strcmp(clave, "toleranciaBajaBaja") == 0)
+    {
+        return convertirReal(valor, &configuracion->tolerancias[CLASE_BAJA][CLASE_BAJA]);
+    }
 
     registrarError("clave de configuracion desconocida %s", clave);
     return false;
@@ -214,6 +290,25 @@ void iniciarConfiguracionPredeterminada(Configuracion *configuracion)
     configuracion->fraccionFinanciada = 0.80;
     configuracion->tasaAnual = 0.06;
     configuracion->plazoMeses = 240;
+    configuracion->proporcionResidencial = 0.885;
+    configuracion->proporcionOcupacion = 0.90;
+    configuracion->cantidadZonas = 8;
+    configuracion->pesosSubestratos[SUBESTRATO_A_MAS] = 8.6;
+    configuracion->pesosSubestratos[SUBESTRATO_A_MENOS] = 17.1;
+    configuracion->pesosSubestratos[SUBESTRATO_M_MAS] = 21.2;
+    configuracion->pesosSubestratos[SUBESTRATO_M] = 21.8;
+    configuracion->pesosSubestratos[SUBESTRATO_M_MENOS] = 16.0;
+    configuracion->pesosSubestratos[SUBESTRATO_B_MAS] = 10.4;
+    configuracion->pesosSubestratos[SUBESTRATO_B_MENOS] = 5.0;
+    configuracion->tolerancias[CLASE_ALTA][CLASE_ALTA] = 0.70;
+    configuracion->tolerancias[CLASE_ALTA][CLASE_MEDIA] = 0.30;
+    configuracion->tolerancias[CLASE_ALTA][CLASE_BAJA] = 0.05;
+    configuracion->tolerancias[CLASE_MEDIA][CLASE_ALTA] = 0.70;
+    configuracion->tolerancias[CLASE_MEDIA][CLASE_MEDIA] = 0.50;
+    configuracion->tolerancias[CLASE_MEDIA][CLASE_BAJA] = 0.40;
+    configuracion->tolerancias[CLASE_BAJA][CLASE_ALTA] = 0.80;
+    configuracion->tolerancias[CLASE_BAJA][CLASE_MEDIA] = 0.90;
+    configuracion->tolerancias[CLASE_BAJA][CLASE_BAJA] = 0.02;
 }
 
 bool cargarConfiguracion(const char *ruta, Configuracion *configuracion)
@@ -276,7 +371,8 @@ bool cargarConfiguracion(const char *ruta, Configuracion *configuracion)
 
 bool validarConfiguracion(const Configuracion *configuracion)
 {
-    if (configuracion->ancho <= 0 || configuracion->alto <= 0)
+    if (configuracion->ancho <= 0 || configuracion->alto <= 0 ||
+        configuracion->ancho > INT_MAX / configuracion->alto)
     {
         registrarError("las dimensiones deben ser positivas");
         return false;
@@ -292,7 +388,8 @@ bool validarConfiguracion(const Configuracion *configuracion)
         !isfinite(configuracion->beta1) || !isfinite(configuracion->beta2) ||
         !isfinite(configuracion->rho) || !isfinite(configuracion->desviacionRuido) ||
         !isfinite(configuracion->limiteRuido) || !isfinite(configuracion->fraccionFinanciada) ||
-        !isfinite(configuracion->tasaAnual))
+        !isfinite(configuracion->tasaAnual) || !isfinite(configuracion->proporcionResidencial) ||
+        !isfinite(configuracion->proporcionOcupacion))
     {
         registrarError("los parametros reales deben ser finitos");
         return false;
@@ -321,6 +418,49 @@ bool validarConfiguracion(const Configuracion *configuracion)
     {
         registrarError("los parametros de ruido no pueden ser negativos");
         return false;
+    }
+
+    if (configuracion->proporcionResidencial < 0.0 || configuracion->proporcionResidencial > 1.0 ||
+        configuracion->proporcionOcupacion < 0.0 || configuracion->proporcionOcupacion > 1.0 ||
+        configuracion->cantidadZonas <= 0)
+    {
+        registrarError("las proporciones de generacion o la cantidad de zonas son invalidas");
+        return false;
+    }
+
+    double sumaPesosSubestratos = 0.0;
+
+    for (int subestrato = 0; subestrato < CANTIDAD_SUBESTRATOS; subestrato++)
+    {
+        double peso = configuracion->pesosSubestratos[subestrato];
+
+        if (!isfinite(peso) || peso < 0.0)
+        {
+            registrarError("los pesos de subestratos no pueden ser negativos");
+            return false;
+        }
+
+        sumaPesosSubestratos += peso;
+    }
+
+    if (sumaPesosSubestratos <= 0.0 || !isfinite(sumaPesosSubestratos))
+    {
+        registrarError("al menos un subestrato debe tener peso positivo");
+        return false;
+    }
+
+    for (int claseHogar = 0; claseHogar < CANTIDAD_CLASES; claseHogar++)
+    {
+        for (int claseVecina = 0; claseVecina < CANTIDAD_CLASES; claseVecina++)
+        {
+            double tolerancia = configuracion->tolerancias[claseHogar][claseVecina];
+
+            if (!isfinite(tolerancia) || tolerancia < 0.0 || tolerancia > 1.0)
+            {
+                registrarError("las tolerancias deben pertenecer al intervalo de cero a uno");
+                return false;
+            }
+        }
     }
 
     return true;
