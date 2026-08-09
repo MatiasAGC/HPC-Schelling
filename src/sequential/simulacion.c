@@ -4,6 +4,7 @@
 #include "schelling/economia.h"
 #include "schelling/indice_vacantes.h"
 #include "schelling/registro.h"
+#include "schelling/simulacion_fases.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -63,9 +64,9 @@ static void evaluarCandidato(const Modelo *modelo, const Vecindario *vecindario,
     }
 }
 
-static int buscarDestino(const Modelo *modelo, const Vecindario *vecindario,
-                         const Configuracion *configuracion, const IndiceVacantes *indice,
-                         int idHogar)
+static int buscarDestinoIndice(const Modelo *modelo, const Vecindario *vecindario,
+                               const Configuracion *configuracion, const IndiceVacantes *indice,
+                               int idHogar)
 {
     const Hogar *hogar = &modelo->hogares[idHogar];
     int filaOrigen;
@@ -140,38 +141,15 @@ static bool tienePrioridad(const Modelo *modelo, const Configuracion *configurac
     return claveCandidato < claveActual || (claveCandidato == claveActual && candidato < actual);
 }
 
-bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
-                       const Configuracion *configuracion, uint64_t iteracion,
-                       MetricasIteracion *metricas)
+bool evaluarEstado(Modelo *modelo, const Vecindario *vecindario, const Configuracion *configuracion,
+                   MetricasIteracion *metricas)
 {
-    int *destinos;
-    int *ganadores;
-    unsigned char *satisfacciones;
-    unsigned char *incluir;
-    IndiceVacantes indices[CANTIDAD_SUBESTRATOS] = {0};
-
     if (modelo == NULL || vecindario == NULL || configuracion == NULL || metricas == NULL)
     {
         return false;
     }
 
-    destinos = malloc((size_t)modelo->cantidadHogares * sizeof(int));
-    ganadores = malloc((size_t)modelo->cantidadCeldas * sizeof(int));
-
-    if ((modelo->cantidadHogares > 0 && destinos == NULL) || ganadores == NULL)
-    {
-        free(destinos);
-        free(ganadores);
-        registrarError("no se pudo reservar memoria para una iteracion");
-        return false;
-    }
-
     memset(metricas, 0, sizeof(*metricas));
-
-    for (int idCelda = 0; idCelda < modelo->cantidadCeldas; idCelda++)
-    {
-        ganadores[idCelda] = ID_INVALIDO;
-    }
 
     for (int idHogar = 0; idHogar < modelo->cantidadHogares; idHogar++)
     {
@@ -180,8 +158,6 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
 
         hogar->satisfecho = evaluarSatisfaccion(modelo, vecindario, hogar->idCelda, hogar->clase,
                                                 configuracion, &aislado);
-        destinos[idHogar] = ID_INVALIDO;
-
         if (hogar->satisfecho)
         {
             metricas->satisfechos++;
@@ -193,12 +169,21 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
         }
     }
 
-    if (!actualizarPreciosVacios(modelo, vecindario, configuracion, iteracion))
+    return true;
+}
+
+bool crearIndicesVacantes(IndicesVacantes *indices, const Modelo *modelo,
+                          const Vecindario *vecindario, const Configuracion *configuracion)
+{
+    unsigned char *satisfacciones;
+    unsigned char *incluir;
+
+    if (indices == NULL || modelo == NULL || vecindario == NULL || configuracion == NULL)
     {
-        free(destinos);
-        free(ganadores);
         return false;
     }
+
+    memset(indices, 0, sizeof(*indices));
 
     satisfacciones = calloc((size_t)modelo->cantidadCeldas * CANTIDAD_CLASES, 1);
     incluir = calloc((size_t)modelo->cantidadCeldas, 1);
@@ -207,8 +192,6 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
     {
         free(satisfacciones);
         free(incluir);
-        free(destinos);
-        free(ganadores);
         registrarError("no se pudo reservar memoria para filtrar las vacantes");
         return false;
     }
@@ -250,23 +233,74 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
                                    : 0;
         }
 
-        if (!crearIndiceVacantesFiltrado(&indices[subestrato], modelo,
+        if (!crearIndiceVacantesFiltrado(&indices->porSubestrato[subestrato], modelo,
                                          configuracion->tamanoBloqueVacantes, incluir))
         {
             for (int indice = 0; indice < subestrato; indice++)
             {
-                liberarIndiceVacantes(&indices[indice]);
+                liberarIndiceVacantes(&indices->porSubestrato[indice]);
             }
             free(satisfacciones);
             free(incluir);
-            free(destinos);
-            free(ganadores);
             return false;
         }
     }
 
     free(satisfacciones);
     free(incluir);
+    return true;
+}
+
+void liberarIndicesVacantes(IndicesVacantes *indices)
+{
+    if (indices == NULL)
+    {
+        return;
+    }
+
+    for (int indice = 0; indice < CANTIDAD_SUBESTRATOS; indice++)
+    {
+        liberarIndiceVacantes(&indices->porSubestrato[indice]);
+    }
+}
+
+int buscarDestinoHogar(const Modelo *modelo, const Vecindario *vecindario,
+                       const Configuracion *configuracion, const IndicesVacantes *indices,
+                       int idHogar)
+{
+    if (modelo == NULL || vecindario == NULL || configuracion == NULL || indices == NULL ||
+        idHogar < 0 || idHogar >= modelo->cantidadHogares)
+    {
+        return ID_INVALIDO;
+    }
+
+    const Hogar *hogar = &modelo->hogares[idHogar];
+    return buscarDestinoIndice(modelo, vecindario, configuracion,
+                               &indices->porSubestrato[(int)hogar->subestrato], idHogar);
+}
+
+bool consolidarMudanzas(Modelo *modelo, const Configuracion *configuracion, uint64_t iteracion,
+                        const int *destinos, MetricasIteracion *metricas)
+{
+    int *ganadores;
+
+    if (modelo == NULL || configuracion == NULL || destinos == NULL || metricas == NULL)
+    {
+        return false;
+    }
+
+    ganadores = malloc((size_t)modelo->cantidadCeldas * sizeof(int));
+
+    if (ganadores == NULL)
+    {
+        registrarError("no se pudo reservar memoria para consolidar mudanzas");
+        return false;
+    }
+
+    for (int idCelda = 0; idCelda < modelo->cantidadCeldas; idCelda++)
+    {
+        ganadores[idCelda] = ID_INVALIDO;
+    }
 
     for (int idHogar = 0; idHogar < modelo->cantidadHogares; idHogar++)
     {
@@ -274,9 +308,7 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
 
         if (!hogar->satisfecho && hogar->mesesBloqueado == 0)
         {
-            int destino = buscarDestino(modelo, vecindario, configuracion,
-                                        &indices[(int)hogar->subestrato], idHogar);
-            destinos[idHogar] = destino;
+            int destino = destinos[idHogar];
 
             if (destino == ID_INVALIDO)
             {
@@ -330,11 +362,49 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
         }
     }
 
-    free(destinos);
     free(ganadores);
-    for (int indice = 0; indice < CANTIDAD_SUBESTRATOS; indice++)
-    {
-        liberarIndiceVacantes(&indices[indice]);
-    }
     return validarModelo(modelo);
+}
+
+bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
+                       const Configuracion *configuracion, uint64_t iteracion,
+                       MetricasIteracion *metricas)
+{
+    int *destinos;
+    IndicesVacantes indices = {0};
+
+    if (modelo == NULL || vecindario == NULL || configuracion == NULL || metricas == NULL)
+    {
+        return false;
+    }
+
+    destinos = malloc((size_t)modelo->cantidadHogares * sizeof(int));
+
+    if (modelo->cantidadHogares > 0 && destinos == NULL)
+    {
+        registrarError("no se pudo reservar memoria para una iteracion");
+        return false;
+    }
+
+    if (!evaluarEstado(modelo, vecindario, configuracion, metricas) ||
+        !actualizarPreciosVacios(modelo, vecindario, configuracion, iteracion) ||
+        !crearIndicesVacantes(&indices, modelo, vecindario, configuracion))
+    {
+        free(destinos);
+        return false;
+    }
+
+    for (int idHogar = 0; idHogar < modelo->cantidadHogares; idHogar++)
+    {
+        Hogar *hogar = &modelo->hogares[idHogar];
+        destinos[idHogar] =
+            !hogar->satisfecho && hogar->mesesBloqueado == 0
+                ? buscarDestinoHogar(modelo, vecindario, configuracion, &indices, idHogar)
+                : ID_INVALIDO;
+    }
+
+    bool resultado = consolidarMudanzas(modelo, configuracion, iteracion, destinos, metricas);
+    liberarIndicesVacantes(&indices);
+    free(destinos);
+    return resultado;
 }

@@ -14,5 +14,7 @@ bool calcularEntornoEconomico(const Modelo *modelo, const Vecindario *vecindario
                               double *demanda, double *poderAdquisitivo);
 bool actualizarPreciosVacios(Modelo *modelo, const Vecindario *vecindario,
                              const Configuracion *configuracion, uint64_t iteracion);
+bool actualizarPrecioVacio(Modelo *modelo, const Vecindario *vecindario,
+                           const Configuracion *configuracion, uint64_t iteracion, int idCelda);
 
 #endif

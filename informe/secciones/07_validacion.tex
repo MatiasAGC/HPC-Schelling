@@ -12,7 +12,7 @@ Un escenario manual adicional enfrenta dos hogares de igual capacidad de pago po
 
 \subsection{Equivalencia entre versiones}
 
-\pendiente{presentar configuraciones comparadas, tolerancias numéricas y resultados.}
+El escenario mínimo de $8\times6$ se ejecuta con uno, dos y tres procesos MPI y un thread por proceso. En todos los casos los hashes de las iteraciones uno y dos son, respectivamente, \texttt{dceac07696c2ac27} y \texttt{7d65e8c90d52123b}, idénticos a la versión secuencial. La comparación es exacta, sin tolerancia numérica, porque cada celda y hogar se actualiza mediante las mismas operaciones y desempates deterministas. Las pruebas también cubren la partición completa de una altura no divisible por la cantidad de procesos y el recorte correcto de halos en los bordes.
 
 \subsection{Checkpoint y reinicio}
 

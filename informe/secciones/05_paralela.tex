@@ -4,11 +4,15 @@ La solución híbrida combina el modelo SPMD de MPI con paralelismo de memoria c
 
 \subsection{Descomposición con MPI}
 
-La grilla se divide en subdominios rectangulares. Cada proceso mantiene celdas propias y un halo de ancho $r$. \pendiente{describir la partición final y justificar el balance entre cómputo y comunicación.}
+La grilla se divide en franjas horizontales contiguas con igual cantidad de filas salvo una diferencia máxima de una. El dueño de una celda se deriva de su fila, sin tablas adicionales. Cada proceso calcula satisfacción, precios y solicitudes únicamente para hogares o celdas de su franja. Mantiene además un halo superior e inferior de ancho $r$ para evaluar vecindarios sobre los límites. Esta primera partición equilibra área y simplifica la comunicación; no garantiza igual cantidad de hogares cuando la ocupación es heterogénea.
+
+Para preservar una referencia distribuida sencilla durante la validación, todos los procesos conservan la estructura global de identificadores y hogares, pero solo el dueño produce cada resultado local. Las vacantes compatibles constituyen un catálogo replicado necesario para la búsqueda global. Esta decisión aumenta memoria y comunicación, y se evaluará frente a particiones con catálogos distribuidos en las extensiones.
 
 \subsection{Comunicación y migraciones}
 
-Los procesos intercambian halos, información compacta de viviendas vacías, solicitudes y hogares que migran. \pendiente{documentar primitivas MPI, orden de mensajes y volumen comunicado.}
+La satisfacción y los precios producidos por cada dueño se combinan mediante \texttt{MPI\_Allreduce}; como cada elemento tiene un único productor, las sumas reconstruyen la instantánea global sin ambigüedad numérica. Las propuestas de destino usan el mismo esquema con el centinela $-1$. Cada proceso resuelve luego los conflictos en orden global determinista y obtiene el mismo estado consolidado. Después de cada iteración, los vecinos intercambian sus filas de borde mediante \texttt{MPI\_Irecv}, \texttt{MPI\_Isend} y \texttt{MPI\_Waitall}. El tiempo de iteración registrado es el máximo obtenido con una reducción colectiva.
+
+Una solicitud cuyo origen y destino pertenecen a franjas distintas se contabiliza como remota. La propiedad del hogar cambia implícitamente porque se vuelve a derivar de su nueva celda; no es necesario renumerarlo ni modificar su identificador global.
 
 \subsection{Paralelización local con OpenMP}
 
@@ -16,4 +20,4 @@ Los recorridos independientes se distribuyen entre threads. Las escrituras se re
 
 \subsection{Corrección y determinismo}
 
-La ocupación resultante debe coincidir con la referencia secuencial para una misma entrada y semilla, independientemente de la cantidad de procesos y threads.
+Después de cada iteración se reducen el mínimo y el máximo del hash de estado. Una diferencia detiene la ejecución, detectando divergencias entre procesos en el primer mes donde aparecen. Además, las pruebas de integración exigen el hash secuencial conocido con uno, dos y tres procesos MPI.

@@ -19,6 +19,7 @@ add_library(schelling_comun STATIC
     src/common/hash.c
     src/common/indice_vacantes.c
     src/common/modelo.c
+    src/common/particion.c
     src/common/registro.c
     src/common/salida.c
     src/common/vecindario.c
@@ -43,6 +44,7 @@ find_package(MPI REQUIRED COMPONENTS C)
 find_package(OpenMP REQUIRED COMPONENTS C)
 
 add_executable(schelling_hybrid app/schelling_hybrid.c)
+target_sources(schelling_hybrid PRIVATE src/parallel/simulacion_mpi.c)
 target_link_libraries(schelling_hybrid PRIVATE schelling_comun MPI::MPI_C OpenMP::OpenMP_C)
 target_compile_options(schelling_hybrid PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 
@@ -97,6 +99,12 @@ if(BUILD_TESTING)
     target_compile_options(prueba_modelo PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
     add_test(NAME modelo COMMAND prueba_modelo)
 
+    add_executable(prueba_particion tests/unit/prueba_particion.c)
+    target_link_libraries(prueba_particion PRIVATE schelling_comun)
+    target_compile_options(prueba_particion PRIVATE -Wall -Wextra -Wpedantic -Wconversion
+                                                     -Wshadow)
+    add_test(NAME particion COMMAND prueba_particion)
+
     add_executable(prueba_indice_vacantes tests/unit/prueba_indice_vacantes.c)
     target_link_libraries(prueba_indice_vacantes PRIVATE schelling_comun)
     target_compile_options(prueba_indice_vacantes PRIVATE -Wall -Wextra -Wpedantic -Wconversion
@@ -124,14 +132,39 @@ if(BUILD_TESTING)
     )
     set_tests_properties(configuracion_inexistente PROPERTIES WILL_FAIL TRUE)
 
-    add_test(NAME inicio_hibrido
+    add_test(NAME mpi_un_proceso
+        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1
+                $<TARGET_FILE:schelling_hybrid>
+                --config "${CMAKE_SOURCE_DIR}/tests/data/minima.conf"
+                --output "${CMAKE_BINARY_DIR}/salida_mpi_1"
+    )
+    set_tests_properties(mpi_un_proceso PROPERTIES
+        ENVIRONMENT "OMP_NUM_THREADS=1"
+        PASS_REGULAR_EXPRESSION "hash 7d65e8c90d52123b"
+        PROCESSORS 1
+    )
+
+    add_test(NAME mpi_dos_procesos
         COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2
                 $<TARGET_FILE:schelling_hybrid>
                 --config "${CMAKE_SOURCE_DIR}/tests/data/minima.conf"
+                --output "${CMAKE_BINARY_DIR}/salida_mpi_2"
     )
-    set_tests_properties(inicio_hibrido PROPERTIES
-        ENVIRONMENT "OMP_NUM_THREADS=2"
-        PASS_REGULAR_EXPRESSION "procesos mpi 2 threads por proceso 2"
-        PROCESSORS 4
+    set_tests_properties(mpi_dos_procesos PROPERTIES
+        ENVIRONMENT "OMP_NUM_THREADS=1"
+        PASS_REGULAR_EXPRESSION "hash 7d65e8c90d52123b"
+        PROCESSORS 2
+    )
+
+    add_test(NAME mpi_tres_procesos
+        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 3
+                $<TARGET_FILE:schelling_hybrid>
+                --config "${CMAKE_SOURCE_DIR}/tests/data/minima.conf"
+                --output "${CMAKE_BINARY_DIR}/salida_mpi_3"
+    )
+    set_tests_properties(mpi_tres_procesos PROPERTIES
+        ENVIRONMENT "OMP_NUM_THREADS=1"
+        PASS_REGULAR_EXPRESSION "hash 7d65e8c90d52123b"
+        PROCESSORS 3
     )
 endif()
