@@ -167,4 +167,28 @@ if(BUILD_TESTING)
         PASS_REGULAR_EXPRESSION "hash 7d65e8c90d52123b"
         PROCESSORS 3
     )
+
+    add_test(NAME openmp_cuatro_threads
+        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1
+                $<TARGET_FILE:schelling_hybrid>
+                --config "${CMAKE_SOURCE_DIR}/tests/data/minima.conf"
+                --output "${CMAKE_BINARY_DIR}/salida_omp_4"
+    )
+    set_tests_properties(openmp_cuatro_threads PROPERTIES
+        ENVIRONMENT "OMP_NUM_THREADS=4"
+        PASS_REGULAR_EXPRESSION "completada con 1 procesos 4 threads hash 7d65e8c90d52123b"
+        PROCESSORS 4
+    )
+
+    add_test(NAME hibrida_dos_por_dos
+        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2
+                $<TARGET_FILE:schelling_hybrid>
+                --config "${CMAKE_SOURCE_DIR}/tests/data/minima.conf"
+                --output "${CMAKE_BINARY_DIR}/salida_hibrida_2x2"
+    )
+    set_tests_properties(hibrida_dos_por_dos PROPERTIES
+        ENVIRONMENT "OMP_NUM_THREADS=2"
+        PASS_REGULAR_EXPRESSION "completada con 2 procesos 2 threads hash 7d65e8c90d52123b"
+        PROCESSORS 4
+    )
 endif()

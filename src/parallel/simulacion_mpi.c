@@ -5,6 +5,7 @@
 #include "schelling/registro.h"
 #include "schelling/simulacion_fases.h"
 
+#include <omp.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,6 +34,7 @@ static bool prepararEstadoDistribuido(Modelo *modelo, const Vecindario *vecindar
         goto liberar;
     }
 
+#pragma omp parallel for schedule(static)
     for (int idHogar = 0; idHogar < modelo->cantidadHogares; idHogar++)
     {
         Hogar *hogar = &modelo->hogares[idHogar];
@@ -70,6 +72,9 @@ static bool prepararEstadoDistribuido(Modelo *modelo, const Vecindario *vecindar
         }
     }
 
+    int preciosValidos = 1;
+
+#pragma omp parallel for schedule(static) reduction(min : preciosValidos)
     for (int idCelda = 0; idCelda < modelo->cantidadCeldas; idCelda++)
     {
         Celda *celda = &modelo->celdas[idCelda];
@@ -77,15 +82,14 @@ static bool prepararEstadoDistribuido(Modelo *modelo, const Vecindario *vecindar
         if (celda->tipo == CELDA_RESIDENCIAL && celda->idHogar == ID_INVALIDO &&
             obtenerDuenoCelda(particion, idCelda) == particion->rank)
         {
-            exito = actualizarPrecioVacio(modelo, vecindario, configuracion, iteracion, idCelda);
+            bool precioValido =
+                actualizarPrecioVacio(modelo, vecindario, configuracion, iteracion, idCelda);
             preciosLocales[idCelda] = celda->precio;
-
-            if (!exito)
-            {
-                break;
-            }
+            preciosValidos = precioValido ? preciosValidos : 0;
         }
     }
+
+    exito = preciosValidos != 0;
 
     MPI_Allreduce(preciosLocales, preciosGlobales, modelo->cantidadCeldas, MPI_DOUBLE, MPI_SUM,
                   comunicador);
@@ -206,6 +210,7 @@ bool ejecutarIteracionMpi(Modelo *modelo, const Vecindario *vecindario,
         return false;
     }
 
+#pragma omp parallel for schedule(static)
     for (int idHogar = 0; idHogar < modelo->cantidadHogares; idHogar++)
     {
         const Hogar *hogar = &modelo->hogares[idHogar];

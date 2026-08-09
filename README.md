@@ -4,7 +4,7 @@ Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segreg
 
 ## Estado
 
-La especificación funcional está cerrada y están disponibles los hitos 1 a 4: simulación secuencial, reproducibilidad, persistencia, índice espacial y distribución MPI por franjas con equivalencia exacta. OpenMP se incorpora en el Hito 5.
+La especificación funcional está cerrada y están disponibles los hitos 1 a 5: simulación secuencial, reproducibilidad, persistencia, índice espacial, distribución MPI por franjas y paralelismo OpenMP con equivalencia exacta.
 
 Los documentos principales son:
 
@@ -57,7 +57,12 @@ ctest --test-dir build --output-on-failure -E '^mpi_'
 OMP_NUM_THREADS=2 mpirun -np 2 ./build/schelling_hybrid --config config/base.conf --validate
 ```
 
-El ejecutable secuencial genera el estado inicial y ejecuta la cantidad configurada de iteraciones. El ejecutable híbrido reparte satisfacción, actualización de precios y búsquedas entre procesos MPI; consolida solicitudes globalmente e intercambia halos entre franjas vecinas. Hasta completar el Hito 5 debe ejecutarse con `OMP_NUM_THREADS=1` para medir exclusivamente MPI.
+El ejecutable secuencial genera el estado inicial y ejecuta la cantidad configurada de iteraciones. El ejecutable híbrido reparte satisfacción, actualización de precios y búsquedas entre procesos MPI y threads OpenMP; consolida solicitudes globalmente e intercambia halos entre franjas vecinas. Para ejecuciones locales se recomienda fijar afinidad:
+
+```bash
+OMP_NUM_THREADS=4 OMP_PROC_BIND=close OMP_PLACES=cores \
+    mpirun -np 2 ./build/schelling_hybrid --config config/base.conf --validate
+```
 
 La opción `tamanoBloqueVacantes` del archivo de configuración controla el lado de los bloques del índice espacial. El valor base es 32 celdas.
 

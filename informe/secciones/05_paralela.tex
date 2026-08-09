@@ -16,8 +16,12 @@ Una solicitud cuyo origen y destino pertenecen a franjas distintas se contabiliz
 
 \subsection{Paralelización local con OpenMP}
 
-Los recorridos independientes se distribuyen entre threads. Las escrituras se realizan en posiciones exclusivas o buffers privados y se consolidan determinísticamente. \pendiente{documentar directivas, planificación, afinidad y sincronizaciones finales.}
+Los recorridos de satisfacción, actualización de precios y búsqueda de destinos usan \texttt{omp parallel for} con planificación estática. Cada thread escribe posiciones exclusivas en los arreglos de satisfacción, precios o destinos; las estructuras de modelo, vecindario e índices se leen como una instantánea inmutable durante cada fase. La validez de los precios usa una reducción \texttt{min}, evitando secciones críticas y variables globales mutables.
+
+Las regiones OpenMP terminan antes de cada colectiva MPI. El programa solicita \texttt{MPI\_THREAD\_FUNNELED} y verifica el nivel provisto, de modo que únicamente el thread principal llama a MPI. Para los experimentos se fijan \texttt{OMP\_PLACES=cores} y \texttt{OMP\_PROC\_BIND=close}; la cantidad de threads queda registrada en \texttt{run.json}.
 
 \subsection{Corrección y determinismo}
 
 Después de cada iteración se reducen el mínimo y el máximo del hash de estado. Una diferencia detiene la ejecución, detectando divergencias entre procesos en el primer mes donde aparecen. Además, las pruebas de integración exigen el hash secuencial conocido con uno, dos y tres procesos MPI.
+
+Las configuraciones de un proceso con cuatro threads y dos procesos con dos threads reproducen también el hash secuencial exacto. En una medición diagnóstica de una iteración del escenario base, un proceso pasó de 3,61 segundos con un thread a 1,85 segundos con cuatro threads, un speedup de 1,95. Los resultados definitivos usarán repeticiones, calentamiento y estadísticos del protocolo experimental.

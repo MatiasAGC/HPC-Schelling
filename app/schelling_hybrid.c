@@ -51,6 +51,7 @@ int main(int argc, char **argv)
     int procesos;
     int cantidadThreads = 1;
     int codigo = 0;
+    uint64_t hashFinal = 0;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &soporteProvisto);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -161,6 +162,7 @@ int main(int argc, char **argv)
         MPI_Allreduce(&tiempoLocal, &tiempoGlobal, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
         uint64_t hash = calcularHashModelo(&modelo);
+        hashFinal = hash;
         uint64_t hashMinimo;
         uint64_t hashMaximo;
         MPI_Allreduce(&hash, &hashMinimo, 1, MPI_UINT64_T, MPI_MIN, MPI_COMM_WORLD);
@@ -218,7 +220,9 @@ int main(int argc, char **argv)
                      : 0;
         if (codigo == 0)
         {
-            registrarInformacion("simulacion hibrida completada");
+            registrarInformacion("simulacion hibrida completada con %d procesos %d threads hash "
+                                 "%016" PRIx64,
+                                 procesos, cantidadThreads, hashFinal);
         }
     }
 
