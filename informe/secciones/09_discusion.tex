@@ -2,7 +2,9 @@
 
 \subsection{Interpretación de resultados}
 
-\pendiente{explicar los cuellos de botella y patrones observados sin atribuir causalidad urbana no demostrada.}
+La búsqueda de destinos domina el tiempo incluso después del índice espacial. El salto de uno a dos threads casi reduce a la mitad esa fase, mientras que cuatro threads en un único proceso no agregan mejora, posiblemente por ancho de banda, planificación del entorno virtualizado o por el trabajo serial de construcción de índices. La configuración $2\times4$ vuelve a reducir la búsqueda al repartir hogares primero por franjas MPI y luego entre threads.
+
+La eficiencia cae al aumentar recursos porque la preparación e índices se replican parcialmente y las colectivas operan sobre arreglos globales. Los 23,2~MB comunicados con dos procesos son pequeños frente al costo de búsqueda en esta máquina, pero crecerán con la grilla y la cantidad de procesos. Las mediciones en FING permitirán separar efectos propios de WSL2 y evaluar escalabilidad entre nodos.
 
 \subsection{Amenazas a la validez}
 
@@ -12,4 +14,4 @@ En particular, la grilla rectangular conserva relaciones abstractas de vecindad,
 
 \subsection{Limitaciones}
 
-\pendiente{actualizar con las limitaciones de la implementación y del estudio final.}
+La implementación MPI conserva catálogos globales de hogares y vacantes para priorizar corrección y determinismo; por tanto, su consumo de memoria por proceso no escala con el subdominio local. La medición local usa una única iteración y comparte recursos con el sistema anfitrión. Los resultados no deben extrapolarse a FING ni interpretarse como evidencia empírica sobre segregación urbana real.

@@ -2,15 +2,59 @@
 
 \subsection{Desempeño local}
 
-\pendiente{incorporar tabla y gráfica de tiempos, speedup y eficiencia en el equipo local.}
+La Tabla~\ref{tab:resultados-locales} resume cinco repeticiones medidas después de un calentamiento. Todas produjeron el hash \texttt{4eac656015050f40}.
+
+\begin{table}[ht]
+\centering
+\caption{Escalabilidad fuerte local para una iteración base}
+\label{tab:resultados-locales}
+\begin{tabular}{rrrrr}
+\toprule
+MPI & OMP & $T$ (s) & $S_p$ & $E_p$ \\
+\midrule
+-- & -- & 3,672 & 1,000 & 1,000 \\
+1 & 1 & 3,706 & 0,991 & 0,991 \\
+1 & 2 & 1,870 & 1,964 & 0,982 \\
+1 & 4 & 1,890 & 1,943 & 0,486 \\
+2 & 2 & 1,876 & 1,957 & 0,489 \\
+2 & 4 & 1,091 & 3,366 & 0,421 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=\columnwidth,
+    height=0.62\columnwidth,
+    xlabel={Recursos de cómputo},
+    ylabel={Speedup},
+    xmin=1,xmax=8,
+    ymin=0,ymax=4,
+    xtick={1,2,4,8},
+    grid=major,
+    legend style={font=\scriptsize,at={(0.03,0.97)},anchor=north west}
+]
+\addplot[dashed,gray] coordinates {(1,1) (2,2) (4,4)};
+\addlegendentry{Ideal}
+\addplot[mark=*,blue] coordinates {(1,0.991) (2,1.964) (4,1.943) (4,1.957) (8,3.366)};
+\addlegendentry{Medido}
+\end{axis}
+\end{tikzpicture}
+\caption{Speedup local respecto a la versión secuencial. Los dos puntos de cuatro recursos corresponden a $1\times4$ y $2\times2$.}
+\label{fig:speedup-local}
+\end{figure}
 
 \subsubsection{Versión secuencial}
 
-\pendiente{informar tiempos totales y por fase de la referencia secuencial.}
+La mediana secuencial fue 3,672~s. La muestra máxima alcanzó 5,979~s, mientras las otras cuatro quedaron entre 3,631 y 3,740~s; por ello se usa la mediana como estadístico principal.
 
 \subsubsection{Versión híbrida}
 
-\pendiente{informar configuraciones MPI/OpenMP y compararlas con la referencia.}
+El costo del ejecutable híbrido con un recurso fue 0,9~\% mayor que el secuencial. Dos threads alcanzaron un speedup de 1,964, pero cuatro threads dentro de un solo proceso no mejoraron ese valor. La configuración $2\times4$ obtuvo el menor tiempo, 1,091~s, y un speedup de 3,366. En ella la búsqueda consumió 0,906~s, la preparación 0,057~s, los índices 0,086~s, la comunicación 0,041~s y la consolidación 0,019~s.
+
+Con dos procesos el desbalance medio de trabajo fue 1,002, consistente con la distribución sintética casi uniforme. Se contabilizaron 4373 solicitudes remotas y 23,2~MB lógicos comunicados durante la iteración.
 
 \subsection{Desempeño en FING}
 
@@ -18,8 +62,8 @@
 
 \subsection{Comportamiento del modelo}
 
-\pendiente{analizar satisfacción, mudanzas, distribución socioeconómica, precios y restricciones económicas.}
+En la primera iteración base, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas y 194083 rechazadas por conflicto; otros 8863 hogares insatisfechos no hallaron destino viable. Estas cifras describen el estado sintético inicial y no constituyen todavía un análisis de equilibrio.
 
 \subsection{Sensibilidad}
 
-\pendiente{comparar las variantes de parámetros efectivamente ejecutadas.}
+En el escenario mediano se compararon diez iteraciones base, sin ruido de precios y sin permanencia mínima. Los hogares satisfechos finales fueron 20955, 20941 y 20966, respectivamente, sobre 32691 hogares: una variación menor a 0,1 puntos porcentuales. Sin permanencia no quedaron hogares bloqueados, como exige la definición. Las solicitudes y hogares sin destino variaron ampliamente entre escenarios en la décima iteración, indicando que una observación mensual aislada no caracteriza la dinámica; el análisis final deberá usar series completas y varias semillas.

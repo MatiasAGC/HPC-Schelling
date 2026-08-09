@@ -104,7 +104,8 @@ bool iniciarSalida(SalidaEjecucion *salida, const char *directorio,
 
     fprintf(salida->metricas, "iteracion,satisfechos,aislados,bloqueados,solicitudes,aceptadas,"
                               "rechazadas,sinDestino,hash\n");
-    fprintf(salida->tiempos, "iteracion,segundos\n");
+    fprintf(salida->tiempos,
+            "iteracion,segundos,preparacion,indices,busqueda,comunicacion,consolidacion\n");
     return true;
 }
 
@@ -119,7 +120,16 @@ bool escribirMetricas(SalidaEjecucion *salida, uint64_t iteracion,
 
 bool escribirTiempo(SalidaEjecucion *salida, uint64_t iteracion, double segundos)
 {
-    return fprintf(salida->tiempos, "%" PRIu64 ",%.9f\n", iteracion, segundos) > 0;
+    TiemposIteracion tiempos = {.total = segundos};
+    return escribirTiempos(salida, iteracion, &tiempos);
+}
+
+bool escribirTiempos(SalidaEjecucion *salida, uint64_t iteracion, const TiemposIteracion *tiempos)
+{
+    return salida != NULL && tiempos != NULL &&
+           fprintf(salida->tiempos, "%" PRIu64 ",%.9f,%.9f,%.9f,%.9f,%.9f,%.9f\n", iteracion,
+                   tiempos->total, tiempos->preparacion, tiempos->indices, tiempos->busqueda,
+                   tiempos->comunicacion, tiempos->consolidacion) > 0;
 }
 
 void cerrarSalida(SalidaEjecucion *salida)

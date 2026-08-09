@@ -52,6 +52,7 @@ int main(int argc, char **argv)
     int cantidadThreads = 1;
     int codigo = 0;
     uint64_t hashFinal = 0;
+    FILE *salidaParalela = NULL;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &soporteProvisto);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -141,6 +142,22 @@ int main(int argc, char **argv)
                              modelo.cantidadHogares, contarViviendasVacias(&modelo));
         inicioValido = iniciarSalida(&salida, opciones.rutaSalida, &configuracion,
                                      SCHELLING_VERSION, procesos, cantidadThreads);
+        char rutaParalela[1024];
+        if (inicioValido)
+        {
+            inicioValido =
+                crearRutaSalida(&salida, "parallel.csv", rutaParalela, sizeof(rutaParalela));
+        }
+        if (inicioValido)
+        {
+            salidaParalela = fopen(rutaParalela, "w");
+            inicioValido = salidaParalela != NULL;
+        }
+        if (inicioValido)
+        {
+            fprintf(salidaParalela, "iteracion,trabajoMinimo,trabajoMaximo,trabajoPromedio,"
+                                    "desbalance,solicitudesRemotas,bytesComunicados\n");
+        }
     }
 
     if (!todosExitosos(rank != 0 || inicioValido, MPI_COMM_WORLD))
@@ -153,10 +170,10 @@ int main(int argc, char **argv)
          iteracion++)
     {
         MetricasIteracion metricas;
-        int solicitudesRemotas;
+        EstadisticasParalelas estadisticas;
         double inicio = MPI_Wtime();
         bool exito = ejecutarIteracionMpi(&modelo, &vecindario, &configuracion, iteracion,
-                                          MPI_COMM_WORLD, &metricas, &solicitudesRemotas);
+                                          MPI_COMM_WORLD, &metricas, &estadisticas);
         double tiempoLocal = MPI_Wtime() - inicio;
         double tiempoGlobal;
         MPI_Allreduce(&tiempoLocal, &tiempoGlobal, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
@@ -171,12 +188,26 @@ int main(int argc, char **argv)
 
         if (rank == 0 && exito)
         {
+            TiemposIteracion tiempos = {
+                .total = tiempoGlobal,
+                .preparacion = estadisticas.tiempoPreparacion,
+                .indices = estadisticas.tiempoIndices,
+                .busqueda = estadisticas.tiempoBusqueda,
+                .comunicacion = estadisticas.tiempoComunicacion,
+                .consolidacion = estadisticas.tiempoConsolidacion,
+            };
             exito = escribirMetricas(&salida, iteracion + 1, &metricas, hash) &&
-                    escribirTiempo(&salida, iteracion + 1, tiempoGlobal);
+                    escribirTiempos(&salida, iteracion + 1, &tiempos);
             registrarInformacion("iteracion %" PRIu64 " satisfechos %d solicitudes %d aceptadas "
                                  "%d rechazadas %d remotas %d hash %016" PRIx64,
                                  iteracion + 1, metricas.satisfechos, metricas.solicitudes,
-                                 metricas.aceptadas, metricas.rechazadas, solicitudesRemotas, hash);
+                                 metricas.aceptadas, metricas.rechazadas,
+                                 estadisticas.solicitudesRemotas, hash);
+            exito = exito &&
+                    fprintf(salidaParalela, "%" PRIu64 ",%d,%d,%.3f,%.9f,%d,%" PRIu64 "\n",
+                            iteracion + 1, estadisticas.trabajoMinimo, estadisticas.trabajoMaximo,
+                            estadisticas.trabajoPromedio, estadisticas.desbalance,
+                            estadisticas.solicitudesRemotas, estadisticas.bytesComunicados) > 0;
 
             if (exito && configuracion.frecuenciaCheckpoint > 0 &&
                 (iteracion + 1) % (uint64_t)configuracion.frecuenciaCheckpoint == 0)
@@ -229,6 +260,10 @@ int main(int argc, char **argv)
 liberar:
     if (rank == 0)
     {
+        if (salidaParalela != NULL)
+        {
+            fclose(salidaParalela);
+        }
         cerrarSalida(&salida);
     }
     liberarVecindario(&vecindario);

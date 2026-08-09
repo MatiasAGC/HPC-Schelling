@@ -17,6 +17,8 @@
 *.a
 *.so
 *.out
+__pycache__/
+*.pyc
 
 # Resultados generados (los directorios pueden conservarse con .gitkeep).
 /output/*

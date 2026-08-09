@@ -2,11 +2,9 @@
 
 \subsection{Plataformas}
 
-\pendiente{documentar CPU, memoria, sistema operativo, compilador y bibliotecas del equipo local.}
+El entorno local de desarrollo es WSL2 con Ubuntu 24.04 x86-64 sobre un AMD Ryzen 5 3600 de seis núcleos y doce threads, 7,7~GiB de memoria y 16~MiB de caché L3. Se utilizó GCC 13.3.0 y Open MPI 4.1.6. El proyecto se construye principalmente con CMake y mantiene un Makefile portable para el entorno académico.
 
-El entorno local de desarrollo utiliza Ubuntu 24.04 x86-64, GCC y MPICH. El proyecto se construye principalmente con CMake y mantiene un Makefile portable para el entorno académico.
-
-La construcción de desarrollo habilita C11 y las advertencias 	exttt{-Wall}, 	exttt{-Wextra}, 	exttt{-Wpedantic}, 	exttt{-Wconversion} y 	exttt{-Wshadow}. Como controles complementarios se emplean 	exttt{clang-format}, 	exttt{cppcheck}, AddressSanitizer, UndefinedBehaviorSanitizer y Valgrind. Los comandos efectivos se conservan en el archivo 	exttt{README.md} del repositorio.
+La construcción de desarrollo habilita C11 y las advertencias \texttt{-Wall}, \texttt{-Wextra}, \texttt{-Wpedantic}, \texttt{-Wconversion} y \texttt{-Wshadow}. Como controles complementarios se emplean \texttt{clang-format}, \texttt{cppcheck}, AddressSanitizer, UndefinedBehaviorSanitizer y Valgrind. Los comandos efectivos se conservan en el archivo \texttt{README.md} del repositorio.
 
 \pendiente{documentar nodos, scheduler, compilador y bibliotecas de la infraestructura de FING.}
 
@@ -14,9 +12,9 @@ Según el material del curso, MPI se habilita en FING mediante el módulo \textt
 
 \subsection{Configuraciones y procedimiento}
 
-Se mantiene fijo el problema y se incrementan procesos MPI y threads OpenMP para evaluar escalabilidad fuerte. Cada configuración incluye calentamiento y múltiples repeticiones; se reportan mediana y dispersión.
+Se mantiene fijo el problema y se incrementan procesos MPI y threads OpenMP para evaluar escalabilidad fuerte. Cada configuración incluye una ejecución de calentamiento y cinco repeticiones; se reportan mediana, mínimo, máximo y desviación estándar poblacional. Los checkpoints se desactivan y se exige el mismo hash final en todas las muestras.
 
-Aquí se documentarán también todas las configuraciones funcionales del modelo: tolerancias, radio, ponderación, precios, capacidad de pago, permanencia mínima, semillas y cantidad de iteraciones. \pendiente{incorporar la tabla definitiva de escenarios.}
+La validación usa tres tamaños: mínimo de $8\times6$ durante dos iteraciones, mediano de $256\times160$ durante diez y base de $1024\times640$. Todos emplean la misma semilla por comparación. La medición local preliminar usa una iteración base para limitar interferencias del entorno interactivo; en FING se aumentará la cantidad de iteraciones después de estimar el tiempo de reserva.
 
 \subsection{Métricas}
 
@@ -24,8 +22,8 @@ Para $T_1$ secuencial y $T_p$ paralelo, se calculan
 \begin{equation}
 S_p=\frac{T_1}{T_p}, \qquad E_p=\frac{S_p}{p}.
 \end{equation}
-También se miden tiempos por fase, desbalance, volumen de comunicación y métricas funcionales del modelo.
+También se miden tiempos máximos por fase, desbalance $L=\max_i W_i/\overline{W}$, volumen lógico de comunicación y métricas funcionales del modelo. El trabajo $W_i$ es la cantidad de hogares elegibles cuya búsqueda de destino pertenece al proceso $i$.
 
 \subsection{Reproducibilidad}
 
-\pendiente{indicar comandos, scripts, afinidad, variables de entorno y política de conservación de resultados.}
+El script \texttt{scripts/ejecutar\_experimentos.py} crea un directorio por calentamiento y repetición, ejecuta las versiones secuencial e híbrida, valida hashes y produce \texttt{resumen.csv}. Fija \texttt{OMP\_PLACES=cores}, \texttt{OMP\_PROC\_BIND=close} y la cantidad de threads de cada configuración. Los resultados crudos no se versionan; el CSV consolidado utilizado por el informe se copia a \texttt{informe/datos} junto con el código y la configuración que permiten regenerarlo.

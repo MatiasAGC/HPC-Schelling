@@ -156,7 +156,8 @@ static bool intercambiarHalos(Modelo *modelo, const Particion *particion, MPI_Co
 
 bool ejecutarIteracionMpi(Modelo *modelo, const Vecindario *vecindario,
                           const Configuracion *configuracion, uint64_t iteracion,
-                          MPI_Comm comunicador, MetricasIteracion *metricas, int *migraciones)
+                          MPI_Comm comunicador, MetricasIteracion *metricas,
+                          EstadisticasParalelas *estadisticas)
 {
     IndicesVacantes indices = {0};
     Particion particion;
@@ -166,9 +167,12 @@ bool ejecutarIteracionMpi(Modelo *modelo, const Vecindario *vecindario,
     int procesos;
     int exitoLocal = 1;
     int exitoGlobal;
+    double inicioFase;
+    double tiemposLocales[5];
+    double tiemposMaximos[5];
 
     if (modelo == NULL || vecindario == NULL || configuracion == NULL || metricas == NULL ||
-        migraciones == NULL)
+        estadisticas == NULL)
     {
         return false;
     }
@@ -193,12 +197,20 @@ bool ejecutarIteracionMpi(Modelo *modelo, const Vecindario *vecindario,
         return false;
     }
 
+    inicioFase = MPI_Wtime();
     if (!prepararEstadoDistribuido(modelo, vecindario, configuracion, iteracion, &particion,
-                                   comunicador, metricas) ||
-        !crearIndicesVacantes(&indices, modelo, vecindario, configuracion))
+                                   comunicador, metricas))
     {
         exitoLocal = 0;
     }
+    tiemposLocales[0] = MPI_Wtime() - inicioFase;
+
+    inicioFase = MPI_Wtime();
+    if (exitoLocal != 0 && !crearIndicesVacantes(&indices, modelo, vecindario, configuracion))
+    {
+        exitoLocal = 0;
+    }
+    tiemposLocales[1] = MPI_Wtime() - inicioFase;
 
     MPI_Allreduce(&exitoLocal, &exitoGlobal, 1, MPI_INT, MPI_MIN, comunicador);
 
@@ -210,7 +222,10 @@ bool ejecutarIteracionMpi(Modelo *modelo, const Vecindario *vecindario,
         return false;
     }
 
-#pragma omp parallel for schedule(static)
+    int trabajoLocal = 0;
+    inicioFase = MPI_Wtime();
+
+#pragma omp parallel for schedule(static) reduction(+ : trabajoLocal)
     for (int idHogar = 0; idHogar < modelo->cantidadHogares; idHogar++)
     {
         const Hogar *hogar = &modelo->hogares[idHogar];
@@ -220,25 +235,57 @@ bool ejecutarIteracionMpi(Modelo *modelo, const Vecindario *vecindario,
             esLocal && !hogar->satisfecho && hogar->mesesBloqueado == 0
                 ? buscarDestinoHogar(modelo, vecindario, configuracion, &indices, idHogar)
                 : ID_INVALIDO;
+        trabajoLocal += esLocal && !hogar->satisfecho && hogar->mesesBloqueado == 0 ? 1 : 0;
     }
+    tiemposLocales[2] = MPI_Wtime() - inicioFase;
 
+    inicioFase = MPI_Wtime();
     MPI_Allreduce(destinosLocales, destinosGlobales, modelo->cantidadHogares, MPI_INT, MPI_MAX,
                   comunicador);
 
-    *migraciones = 0;
+    memset(estadisticas, 0, sizeof(*estadisticas));
+    MPI_Allreduce(&trabajoLocal, &estadisticas->trabajoMinimo, 1, MPI_INT, MPI_MIN, comunicador);
+    MPI_Allreduce(&trabajoLocal, &estadisticas->trabajoMaximo, 1, MPI_INT, MPI_MAX, comunicador);
+    int trabajoTotal;
+    MPI_Allreduce(&trabajoLocal, &trabajoTotal, 1, MPI_INT, MPI_SUM, comunicador);
+    estadisticas->trabajoPromedio = (double)trabajoTotal / procesos;
+    estadisticas->desbalance = estadisticas->trabajoPromedio == 0.0
+                                   ? 1.0
+                                   : estadisticas->trabajoMaximo / estadisticas->trabajoPromedio;
+
     for (int idHogar = 0; idHogar < modelo->cantidadHogares; idHogar++)
     {
         if (destinosGlobales[idHogar] != ID_INVALIDO &&
             obtenerDuenoCelda(&particion, modelo->hogares[idHogar].idCelda) !=
                 obtenerDuenoCelda(&particion, destinosGlobales[idHogar]))
         {
-            (*migraciones)++;
+            estadisticas->solicitudesRemotas++;
         }
     }
 
-    bool resultado =
-        consolidarMudanzas(modelo, configuracion, iteracion, destinosGlobales, metricas) &&
-        intercambiarHalos(modelo, &particion, comunicador);
+    uint64_t bytesColectivas = (uint64_t)procesos * (uint64_t)(procesos - 1) *
+                               ((uint64_t)modelo->cantidadHogares * sizeof(int) * 3U +
+                                (uint64_t)modelo->cantidadCeldas * sizeof(double));
+    uint64_t bytesHaloLocal = (uint64_t)((rank > 0 ? 1 : 0) + (rank + 1 < procesos ? 1 : 0)) *
+                              (uint64_t)particion.radioHalo * (uint64_t)modelo->ancho *
+                              sizeof(Celda) * 2U;
+    uint64_t bytesHaloGlobal;
+    MPI_Allreduce(&bytesHaloLocal, &bytesHaloGlobal, 1, MPI_UINT64_T, MPI_SUM, comunicador);
+    estadisticas->bytesComunicados = bytesColectivas + bytesHaloGlobal;
+    tiemposLocales[3] = MPI_Wtime() - inicioFase;
+
+    inicioFase = MPI_Wtime();
+    bool consolidado =
+        consolidarMudanzas(modelo, configuracion, iteracion, destinosGlobales, metricas);
+    bool halosIntercambiados = intercambiarHalos(modelo, &particion, comunicador);
+    bool resultado = consolidado && halosIntercambiados;
+    tiemposLocales[4] = MPI_Wtime() - inicioFase;
+    MPI_Allreduce(tiemposLocales, tiemposMaximos, 5, MPI_DOUBLE, MPI_MAX, comunicador);
+    estadisticas->tiempoPreparacion = tiemposMaximos[0];
+    estadisticas->tiempoIndices = tiemposMaximos[1];
+    estadisticas->tiempoBusqueda = tiemposMaximos[2];
+    estadisticas->tiempoComunicacion = tiemposMaximos[3];
+    estadisticas->tiempoConsolidacion = tiemposMaximos[4];
     liberarIndicesVacantes(&indices);
     free(destinosLocales);
     free(destinosGlobales);

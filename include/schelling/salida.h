@@ -15,12 +15,23 @@ typedef struct
     FILE *tiempos;
 } SalidaEjecucion;
 
+typedef struct
+{
+    double total;
+    double preparacion;
+    double indices;
+    double busqueda;
+    double comunicacion;
+    double consolidacion;
+} TiemposIteracion;
+
 bool iniciarSalida(SalidaEjecucion *salida, const char *directorio,
                    const Configuracion *configuracion, const char *version, int procesos,
                    int threads);
 bool escribirMetricas(SalidaEjecucion *salida, uint64_t iteracion,
                       const MetricasIteracion *metricas, uint64_t hash);
 bool escribirTiempo(SalidaEjecucion *salida, uint64_t iteracion, double segundos);
+bool escribirTiempos(SalidaEjecucion *salida, uint64_t iteracion, const TiemposIteracion *tiempos);
 bool crearRutaSalida(const SalidaEjecucion *salida, const char *nombre, char *ruta,
                      size_t longitudRuta);
 void cerrarSalida(SalidaEjecucion *salida);
