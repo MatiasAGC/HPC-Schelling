@@ -1,0 +1,35 @@
+# Material de referencia local del proyecto (PDF del informe y del curso).
+/Instrucciones/*
+
+# La especificación del proyecto sí forma parte del repositorio.
+!/Instrucciones/ESPECIFICACION.md
+!/Instrucciones/ESTILO_C.md
+
+# Metadatos de archivos descargados desde Windows/WSL.
+*:Zone.Identifier
+
+# Artefactos de compilación y ejecución.
+/build/
+*.o
+*.a
+*.so
+*.out
+
+# Resultados generados (los directorios pueden conservarse con .gitkeep).
+/output/*
+/results/*
+!/output/.gitkeep
+!/results/.gitkeep
+
+# Auxiliares y PDF generado por LaTeX (las fuentes sí se versionan).
+/informe/build/
+/informe/informe.pdf
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc

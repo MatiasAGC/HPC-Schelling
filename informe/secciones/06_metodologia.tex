@@ -1,0 +1,29 @@
+\section{Metodología experimental}
+
+\subsection{Plataformas}
+
+\pendiente{documentar CPU, memoria, sistema operativo, compilador y bibliotecas del equipo local.}
+
+El entorno local de desarrollo utiliza Ubuntu 24.04 x86-64, GCC y MPICH. El proyecto se construye principalmente con CMake y mantiene un Makefile portable para el entorno académico.
+
+\pendiente{documentar nodos, scheduler, compilador y bibliotecas de la infraestructura de FING.}
+
+Según el material del curso, MPI se habilita en FING mediante el módulo \texttt{mpi/mpich-x86\_64}; los binarios se compilan con \texttt{mpicc} y se ejecutan mediante \texttt{mpirun} con una lista o archivo de hosts. Esta información se verificará en las máquinas antes de realizar mediciones.
+
+\subsection{Configuraciones y procedimiento}
+
+Se mantiene fijo el problema y se incrementan procesos MPI y threads OpenMP para evaluar escalabilidad fuerte. Cada configuración incluye calentamiento y múltiples repeticiones; se reportan mediana y dispersión.
+
+Aquí se documentarán también todas las configuraciones funcionales del modelo: tolerancias, radio, ponderación, precios, capacidad de pago, permanencia mínima, semillas y cantidad de iteraciones. \pendiente{incorporar la tabla definitiva de escenarios.}
+
+\subsection{Métricas}
+
+Para $T_1$ secuencial y $T_p$ paralelo, se calculan
+\begin{equation}
+S_p=\frac{T_1}{T_p}, \qquad E_p=\frac{S_p}{p}.
+\end{equation}
+También se miden tiempos por fase, desbalance, volumen de comunicación y métricas funcionales del modelo.
+
+\subsection{Reproducibilidad}
+
+\pendiente{indicar comandos, scripts, afinidad, variables de entorno y política de conservación de resultados.}

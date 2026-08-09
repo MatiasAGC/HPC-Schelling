@@ -1,0 +1,19 @@
+\section{Diseño e implementación paralela}
+
+La solución híbrida combina el modelo SPMD de MPI con paralelismo de memoria compartida mediante OpenMP \cite{mpi,openmp}.
+
+\subsection{Descomposición con MPI}
+
+La grilla se divide en subdominios rectangulares. Cada proceso mantiene celdas propias y un halo de ancho $r$. \pendiente{describir la partición final y justificar el balance entre cómputo y comunicación.}
+
+\subsection{Comunicación y migraciones}
+
+Los procesos intercambian halos, información compacta de viviendas vacías, solicitudes y hogares que migran. \pendiente{documentar primitivas MPI, orden de mensajes y volumen comunicado.}
+
+\subsection{Paralelización local con OpenMP}
+
+Los recorridos independientes se distribuyen entre threads. Las escrituras se realizan en posiciones exclusivas o buffers privados y se consolidan determinísticamente. \pendiente{documentar directivas, planificación, afinidad y sincronizaciones finales.}
+
+\subsection{Corrección y determinismo}
+
+La ocupación resultante debe coincidir con la referencia secuencial para una misma entrada y semilla, independientemente de la cantidad de procesos y threads.

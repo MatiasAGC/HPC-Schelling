@@ -1,0 +1,21 @@
+\section{Datos, preparación e hipótesis}
+
+La distribución socioeconómica se basa en los subestratos del INSE y la cantidad de viviendas y hogares se aproxima a partir del Censo 2023 \cite{inse2023,censo2023}.
+
+Para Montevideo, la Tabla D3 del INSE 2023 informa las proporciones de hogares B$-$ 5,0\%, B+ 10,4\%, M$-$ 16,0\%, M 21,8\%, M+ 21,2\%, A$-$ 17,1\% y A+ 8,6\%. Estas cifras sustituyen en el escenario base a la distribución preliminar no específica de Montevideo. Los ingresos de referencia continúan siendo los promedios per cápita por subestrato con valor locativo estimados sobre la ECH 2022.
+
+\subsection{Fuentes y transformaciones}
+
+Se prioriza la versión ponderada del Censo 2023 publicada por el INE en mayo de 2026. \pendiente{enumerar los archivos finalmente descargados, checksum, fechas, licencias y transformaciones reproducibles.}
+
+La información municipal de la Intendencia basada en ECH 2023 se utilizará para indicadores socioeconómicos. Sus tablas de cantidades de viviendas corresponden a los censos 2004 y 2011 y no se tratarán como datos de vivienda de 2023.
+
+\subsection{Generación de instancias}
+
+Además del escenario de Montevideo se utilizan instancias sintéticas pequeñas y medianas para verificar reglas e invariantes. Toda generación registra la semilla y los parámetros efectivos.
+
+\subsection{Supuestos y limitaciones de los datos}
+
+\pendiente{documentar imputaciones y el procedimiento definitivo de agregación por municipio.}
+
+La geometría real no se utiliza en el escenario base. Esta convención elimina una dependencia cartográfica, pero impide interpretar posiciones o distancias simuladas como posiciones o distancias reales. La cartografía censal publicada en mayo de 2026, que se encontraba bajo revisión técnica del INE al diseñar el proyecto, queda reservada para una extensión futura.

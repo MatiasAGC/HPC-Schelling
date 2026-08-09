@@ -1,0 +1,46 @@
+\section{Descripción del problema y modelo}
+
+\subsection{Grilla, viviendas y hogares}
+
+Montevideo se representa mediante una grilla bidimensional rectangular con celdas residenciales y no residenciales, siguiendo la abstracción espacial del modelo clásico de Schelling. Una celda residencial contiene como máximo una vivienda, que puede estar ocupada o vacía. Los hogares se clasifican en siete subestratos y tres clases socioeconómicas.
+
+El escenario completo inicial utiliza $1024\times640$ celdas. Sus coordenadas expresan proximidad discreta dentro del modelo y no una proyección cartográfica ni ubicaciones reales de Montevideo. Los ocho municipios se representan como zonas contiguas dimensionadas a partir de datos agregados. Esta simplificación permite conservar totales oficiales sin afirmar que la grilla reproduce la forma, las distancias o la trama urbana de la ciudad. La grilla utiliza bordes cerrados: los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
+
+\subsection{Vecindario y ponderación}
+
+Para una celda residencial $c$, el vecindario de radio $r$ se define como
+\begin{equation}
+N_r(c)=\{c'\in C_R : d(c,c')\leq r\}.
+\end{equation}
+La influencia disminuye con la distancia mediante un kernel gaussiano,
+\begin{equation}
+w(c,c')=\exp\left(-\frac{d(c,c')^2}{2\sigma^2}\right).
+\end{equation}
+
+El escenario base utiliza pertenencia de Chebyshev con $r=2$, por lo que considera un cuadrado de hasta 24 vecinos, y calcula el peso con distancia euclidiana y $\sigma=1{,}0$. Separar ambas métricas permite un recorrido rectangular eficiente y, a la vez, asignar menor influencia a diagonales y celdas lejanas. Como referencia se evaluará una variante clásica con $r=1$ y ponderación uniforme.
+
+\subsection{Satisfacción y tolerancias}
+
+La proporción ponderada de cada clase se compara con una matriz configurable de preferencias mínimas y tolerancias máximas. La propia unidad familiar no participa del cálculo.
+
+Cuando no existe ningún hogar vecino, la unidad familiar se considera satisfecha por aislamiento. La misma regla se aplica al evaluar una vivienda candidata y estos casos se contabilizan por separado en las métricas. Esta convención evita asignar proporciones artificiales a un denominador vacío.
+
+La configuración base exige para una unidad de clase alta al menos 70\% de vecinos altos, como máximo 30\% medios y 5\% bajos; para una unidad media, como máximo 70\% altos, al menos 50\% medios y como máximo 40\% bajos; y para una unidad baja, como máximo 80\% altos, 90\% medios y al menos 2\% bajos. Todas las condiciones de la fila deben cumplirse simultáneamente.
+
+\subsection{Precios y restricción económica}
+
+El precio propuesto sigue un modelo hedónico simplificado:
+\begin{equation}
+\log p_v(t)=\alpha_0+\beta_1D_v(t)+\beta_2A_v(t)+\epsilon_v(t).
+\end{equation}
+La demanda $D_v(t)$ es la proporción ponderada de viviendas residenciales ocupadas del vecindario. El poder adquisitivo $A_v(t)$ es el ingreso medio ponderado de sus hogares, normalizado entre los ingresos de referencia de B$-$ y A+. Ambas variables pertenecen a $[0,1]$; cuando no existe un denominador válido se asigna cero. El ruido $\epsilon_v(t)$ sigue una normal con media cero y desviación $0{,}05$, truncada a $[-0{,}15;0{,}15]$, y se genera de forma determinista por vivienda e iteración mediante un generador sin estado compartido.
+
+El precio y los ingresos se expresan en miles de pesos constantes de 2022. Para aproximar la cuota se usa una anualidad de cuota fija sobre el 80\% del precio, con tasa nominal anual de 6\% y plazo de 240 meses. Estos parámetros son configurables y no pretenden reproducir un producto hipotecario real. Una vivienda es accesible cuando su cuota no supera la fracción $\rho$ del ingreso del hogar.
+
+La configuración base adopta $\beta_1=0{,}40$, $\beta_2=0{,}60$ y $\rho=0{,}30$. El intercepto no se selecciona arbitrariamente: se calibra para que un hogar M, en un entorno con $D=0{,}90$ y el poder adquisitivo normalizado correspondiente a su ingreso, pague una cuota equivalente al 25\% de dicho ingreso. Con los supuestos financieros anteriores se obtiene un precio de referencia de $1448{,}15$ miles de pesos de 2022 y $\alpha_0=6{,}793886203$. Esta cuota objetivo deja un margen respecto del límite de accesibilidad del 30\%.
+
+\subsection{Mudanzas y evolución temporal}
+
+La simulación es síncrona. Los hogares insatisfechos y no bloqueados solicitan destinos accesibles; los conflictos se resuelven de forma determinista antes de aplicar simultáneamente las mudanzas. Una vivienda liberada queda disponible en la iteración siguiente.
+
+Después de mudarse en el mes $t$, un hogar permanece bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. Su satisfacción se continúa evaluando durante ese período. El parámetro es configurable y se considera una variante sin permanencia mínima.

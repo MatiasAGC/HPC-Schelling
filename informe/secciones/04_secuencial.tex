@@ -1,0 +1,33 @@
+\section{Diseño e implementación secuencial}
+
+La versión secuencial define la semántica de referencia y proporciona el tiempo base para calcular speedup.
+
+\subsection{Estructuras de datos}
+
+\pendiente{describir arreglos de celdas, hogares, vacantes e índices espaciales implementados.}
+
+\subsection{Funciones y organización del código}
+
+\pendiente{explicar las funciones principales, módulos y responsabilidades sin convertir el informe en un listado del código fuente.}
+
+\subsection{Algoritmo}
+
+Cada iteración evalúa satisfacción sobre un estado inmutable, actualiza precios, genera solicitudes, resuelve conflictos y consolida las mudanzas. \pendiente{agregar pseudocódigo y análisis de complejidad.}
+
+\subsection{Reproducibilidad y checkpoints}
+
+Las decisiones pseudoaleatorias se derivan de claves estables para no depender del orden de recorrido. \pendiente{documentar el generador y el formato final de checkpoint.}
+
+En ejecuciones normales se genera un checkpoint cada 50 iteraciones y se conservan los dos últimos completos. La escritura usa archivos temporales y un manifiesto final para que un estado parcial no sea reiniciable. En los benchmarks los checkpoints se desactivan para evitar que la E/S altere la comparación de tiempos.
+
+\subsection{Optimizaciones}
+
+\pendiente{documentar optimizaciones únicamente después de medirlas y validarlas contra la referencia.}
+
+\subsection{Convenciones y simplificaciones}
+
+La grilla rectangular es una abstracción y no un mapa de Montevideo. Cada celda residencial representa una vivienda discreta, sin superficie física asociada. Los datos oficiales se conservan como cantidades y distribuciones agregadas por zona. \pendiente{completar las convenciones de índices y representación numérica después de implementarlas.}
+
+\subsection{Dificultades de implementación}
+
+\pendiente{describir problemas relevantes, diagnóstico y solución; omitir incidencias triviales que no aporten al análisis.}

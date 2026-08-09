@@ -1,0 +1,52 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{xcolor}
+
+\graphicspath{{figuras/}{build/figuras/}}
+\newcommand{\pendiente}[1]{\textcolor{red}{\textbf{PENDIENTE: #1}}}
+\renewcommand{\IEEEkeywordsname}{Palabras clave}
+
+\hypersetup{
+  pdftitle={Modelo paralelo de segregación residencial basado en Schelling aplicado a Montevideo},
+  pdfauthor={Camilo Ferrero y Matías Arce},
+  pdfsubject={Simulación secuencial e híbrida MPI/OpenMP del modelo de Schelling},
+  pdfkeywords={Schelling, segregación residencial, MPI, OpenMP, HPC},
+  hidelinks
+}
+
+\title{Modelo paralelo de segregación residencial basado en Schelling aplicado a Montevideo}
+
+\author{
+\IEEEauthorblockN{Camilo Ferrero y Matías Arce}
+\IEEEauthorblockA{Facultad de Ingeniería, Universidad de la República\\
+Montevideo, Uruguay\\
+\{camiloferrero13, sonmak44\}@gmail.com}
+}
+
+\begin{document}
+\maketitle
+
+\input{secciones/00_resumen}
+\input{secciones/01_introduccion}
+\input{secciones/02_modelo}
+\input{secciones/03_datos}
+\input{secciones/04_secuencial}
+\input{secciones/05_paralela}
+\input{secciones/06_metodologia}
+\input{secciones/07_validacion}
+\input{secciones/08_resultados}
+\input{secciones/09_discusion}
+\input{secciones/10_conclusiones}
+
+\bibliographystyle{IEEEtran}
+\bibliography{referencias}
+
+\end{document}
