@@ -58,7 +58,7 @@ bool iniciarSalida(SalidaEjecucion *salida, const char *directorio,
             "  \"ruidoHabilitado\": %s,\n  \"fraccionFinanciada\": %.17g,\n"
             "  \"tasaAnual\": %.17g,\n  \"plazoMeses\": %d,\n"
             "  \"proporcionResidencial\": %.17g,\n  \"proporcionOcupacion\": %.17g,\n"
-            "  \"cantidadZonas\": %d,\n"
+            "  \"cantidadZonas\": %d,\n  \"tamanoBloqueVacantes\": %d,\n"
             "  \"pesosSubestratos\": [%.17g, %.17g, %.17g, %.17g, %.17g, %.17g, %.17g],\n"
             "  \"tolerancias\": [[%.17g, %.17g, %.17g], [%.17g, %.17g, %.17g], [%.17g, %.17g, "
             "%.17g]],\n"
@@ -71,15 +71,15 @@ bool iniciarSalida(SalidaEjecucion *salida, const char *directorio,
             configuracion->limiteRuido, configuracion->ruidoHabilitado ? "true" : "false",
             configuracion->fraccionFinanciada, configuracion->tasaAnual, configuracion->plazoMeses,
             configuracion->proporcionResidencial, configuracion->proporcionOcupacion,
-            configuracion->cantidadZonas, configuracion->pesosSubestratos[0],
-            configuracion->pesosSubestratos[1], configuracion->pesosSubestratos[2],
-            configuracion->pesosSubestratos[3], configuracion->pesosSubestratos[4],
-            configuracion->pesosSubestratos[5], configuracion->pesosSubestratos[6],
-            configuracion->tolerancias[0][0], configuracion->tolerancias[0][1],
-            configuracion->tolerancias[0][2], configuracion->tolerancias[1][0],
-            configuracion->tolerancias[1][1], configuracion->tolerancias[1][2],
-            configuracion->tolerancias[2][0], configuracion->tolerancias[2][1],
-            configuracion->tolerancias[2][2], procesos, threads);
+            configuracion->cantidadZonas, configuracion->tamanoBloqueVacantes,
+            configuracion->pesosSubestratos[0], configuracion->pesosSubestratos[1],
+            configuracion->pesosSubestratos[2], configuracion->pesosSubestratos[3],
+            configuracion->pesosSubestratos[4], configuracion->pesosSubestratos[5],
+            configuracion->pesosSubestratos[6], configuracion->tolerancias[0][0],
+            configuracion->tolerancias[0][1], configuracion->tolerancias[0][2],
+            configuracion->tolerancias[1][0], configuracion->tolerancias[1][1],
+            configuracion->tolerancias[1][2], configuracion->tolerancias[2][0],
+            configuracion->tolerancias[2][1], configuracion->tolerancias[2][2], procesos, threads);
 
     if (fclose(resumen) != 0 || !crearRutaSalida(salida, "metrics.csv", ruta, sizeof(ruta)))
     {

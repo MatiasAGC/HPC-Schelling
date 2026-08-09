@@ -2,6 +2,7 @@
 
 #include "schelling/aleatorio.h"
 #include "schelling/economia.h"
+#include "schelling/indice_vacantes.h"
 #include "schelling/registro.h"
 
 #include <stddef.h>
@@ -23,33 +24,97 @@ static long long distanciaCuadrada(const Modelo *modelo, int origen, int destino
     return diferenciaFila * diferenciaFila + diferenciaColumna * diferenciaColumna;
 }
 
-static int buscarDestino(const Modelo *modelo, const Vecindario *vecindario,
-                         const Configuracion *configuracion, int idHogar)
+static void evaluarCandidato(const Modelo *modelo, const Vecindario *vecindario,
+                             const Configuracion *configuracion, int idHogar, int idCelda,
+                             bool satisfaccionPrecalculada, int *mejorDestino,
+                             long long *mejorDistancia)
 {
     const Hogar *hogar = &modelo->hogares[idHogar];
+    const Celda *celda = &modelo->celdas[idCelda];
+    bool aislado;
+    int filaOrigen;
+    int columnaOrigen;
+    int filaDestino;
+    int columnaDestino;
+    bool satisface = satisfaccionPrecalculada;
+
+    obtenerCoordenadas(modelo, hogar->idCelda, &filaOrigen, &columnaOrigen);
+    obtenerCoordenadas(modelo, idCelda, &filaDestino, &columnaDestino);
+
+    if (abs(filaOrigen - filaDestino) <= vecindario->radio &&
+        abs(columnaOrigen - columnaDestino) <= vecindario->radio)
+    {
+        satisface = evaluarSatisfaccionExcluyendo(modelo, vecindario, idCelda, idHogar,
+                                                  hogar->clase, configuracion, &aislado);
+    }
+
+    if (!esViviendaAccesible(celda->precio, hogar, configuracion) || !satisface)
+    {
+        return;
+    }
+
+    long long distancia = distanciaCuadrada(modelo, hogar->idCelda, idCelda);
+
+    if (*mejorDestino == ID_INVALIDO || distancia < *mejorDistancia ||
+        (distancia == *mejorDistancia && idCelda < *mejorDestino))
+    {
+        *mejorDestino = idCelda;
+        *mejorDistancia = distancia;
+    }
+}
+
+static int buscarDestino(const Modelo *modelo, const Vecindario *vecindario,
+                         const Configuracion *configuracion, const IndiceVacantes *indice,
+                         int idHogar)
+{
+    const Hogar *hogar = &modelo->hogares[idHogar];
+    int filaOrigen;
+    int columnaOrigen;
+    int filaBloqueOrigen;
+    int columnaBloqueOrigen;
     int mejorDestino = ID_INVALIDO;
     long long mejorDistancia = 0;
+    int radioMaximo =
+        indice->bloquesAncho > indice->bloquesAlto ? indice->bloquesAncho : indice->bloquesAlto;
 
-    for (int idCelda = 0; idCelda < modelo->cantidadCeldas; idCelda++)
+    obtenerCoordenadas(modelo, hogar->idCelda, &filaOrigen, &columnaOrigen);
+    filaBloqueOrigen = filaOrigen / indice->tamanoBloque;
+    columnaBloqueOrigen = columnaOrigen / indice->tamanoBloque;
+
+    for (int radio = 0; radio < radioMaximo; radio++)
     {
-        const Celda *celda = &modelo->celdas[idCelda];
-        bool aislado;
-
-        if (celda->tipo != CELDA_RESIDENCIAL || celda->idHogar != ID_INVALIDO ||
-            !esViviendaAccesible(celda->precio, hogar, configuracion) ||
-            !evaluarSatisfaccionExcluyendo(modelo, vecindario, idCelda, idHogar, hogar->clase,
-                                           configuracion, &aislado))
+        for (int deltaFila = -radio; deltaFila <= radio; deltaFila++)
         {
-            continue;
+            for (int deltaColumna = -radio; deltaColumna <= radio; deltaColumna++)
+            {
+                if (radio > 0 && abs(deltaFila) != radio && abs(deltaColumna) != radio)
+                {
+                    continue;
+                }
+
+                int idBloque = obtenerIdBloque(indice, filaBloqueOrigen + deltaFila,
+                                               columnaBloqueOrigen + deltaColumna);
+
+                if (idBloque == ID_INVALIDO)
+                {
+                    continue;
+                }
+
+                for (int posicion = indice->inicios[idBloque];
+                     posicion < indice->inicios[idBloque + 1]; posicion++)
+                {
+                    evaluarCandidato(modelo, vecindario, configuracion, idHogar,
+                                     indice->idsVacantes[posicion], true, &mejorDestino,
+                                     &mejorDistancia);
+                }
+            }
         }
 
-        long long distancia = distanciaCuadrada(modelo, hogar->idCelda, idCelda);
+        long long distanciaExterior = (long long)radio * indice->tamanoBloque + 1;
 
-        if (mejorDestino == ID_INVALIDO || distancia < mejorDistancia ||
-            (distancia == mejorDistancia && idCelda < mejorDestino))
+        if (mejorDestino != ID_INVALIDO && distanciaExterior * distanciaExterior > mejorDistancia)
         {
-            mejorDestino = idCelda;
-            mejorDistancia = distancia;
+            break;
         }
     }
 
@@ -81,6 +146,9 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
 {
     int *destinos;
     int *ganadores;
+    unsigned char *satisfacciones;
+    unsigned char *incluir;
+    IndiceVacantes indices[CANTIDAD_SUBESTRATOS] = {0};
 
     if (modelo == NULL || vecindario == NULL || configuracion == NULL || metricas == NULL)
     {
@@ -132,13 +200,82 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
         return false;
     }
 
+    satisfacciones = calloc((size_t)modelo->cantidadCeldas * CANTIDAD_CLASES, 1);
+    incluir = calloc((size_t)modelo->cantidadCeldas, 1);
+
+    if (satisfacciones == NULL || incluir == NULL)
+    {
+        free(satisfacciones);
+        free(incluir);
+        free(destinos);
+        free(ganadores);
+        registrarError("no se pudo reservar memoria para filtrar las vacantes");
+        return false;
+    }
+
+    for (int idCelda = 0; idCelda < modelo->cantidadCeldas; idCelda++)
+    {
+        const Celda *celda = &modelo->celdas[idCelda];
+
+        if (celda->tipo == CELDA_RESIDENCIAL && celda->idHogar == ID_INVALIDO)
+        {
+            for (int clase = 0; clase < CANTIDAD_CLASES; clase++)
+            {
+                bool aislado;
+                size_t posicion = (size_t)idCelda * CANTIDAD_CLASES + (size_t)clase;
+                satisfacciones[posicion] =
+                    evaluarSatisfaccion(modelo, vecindario, idCelda, (ClaseSocioeconomica)clase,
+                                        configuracion, &aislado)
+                        ? 1
+                        : 0;
+            }
+        }
+    }
+
+    for (int subestrato = 0; subestrato < CANTIDAD_SUBESTRATOS; subestrato++)
+    {
+        Hogar hogarReferencia = {0};
+        hogarReferencia.subestrato = (Subestrato)subestrato;
+        hogarReferencia.clase = obtenerClaseSubestrato(hogarReferencia.subestrato);
+        hogarReferencia.ingresoMensual = obtenerIngresoBase(hogarReferencia.subestrato);
+
+        for (int idCelda = 0; idCelda < modelo->cantidadCeldas; idCelda++)
+        {
+            size_t posicion =
+                (size_t)idCelda * CANTIDAD_CLASES + (size_t)(int)hogarReferencia.clase;
+            incluir[idCelda] = satisfacciones[posicion] != 0 &&
+                                       esViviendaAccesible(modelo->celdas[idCelda].precio,
+                                                           &hogarReferencia, configuracion)
+                                   ? 1
+                                   : 0;
+        }
+
+        if (!crearIndiceVacantesFiltrado(&indices[subestrato], modelo,
+                                         configuracion->tamanoBloqueVacantes, incluir))
+        {
+            for (int indice = 0; indice < subestrato; indice++)
+            {
+                liberarIndiceVacantes(&indices[indice]);
+            }
+            free(satisfacciones);
+            free(incluir);
+            free(destinos);
+            free(ganadores);
+            return false;
+        }
+    }
+
+    free(satisfacciones);
+    free(incluir);
+
     for (int idHogar = 0; idHogar < modelo->cantidadHogares; idHogar++)
     {
         Hogar *hogar = &modelo->hogares[idHogar];
 
         if (!hogar->satisfecho && hogar->mesesBloqueado == 0)
         {
-            int destino = buscarDestino(modelo, vecindario, configuracion, idHogar);
+            int destino = buscarDestino(modelo, vecindario, configuracion,
+                                        &indices[(int)hogar->subestrato], idHogar);
             destinos[idHogar] = destino;
 
             if (destino == ID_INVALIDO)
@@ -195,5 +332,9 @@ bool ejecutarIteracion(Modelo *modelo, const Vecindario *vecindario,
 
     free(destinos);
     free(ganadores);
+    for (int indice = 0; indice < CANTIDAD_SUBESTRATOS; indice++)
+    {
+        liberarIndiceVacantes(&indices[indice]);
+    }
     return validarModelo(modelo);
 }

@@ -4,7 +4,7 @@ Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segreg
 
 ## Estado
 
-La especificación funcional está cerrada y están disponibles los hitos 1 y 2: simulación secuencial, generación reproducible, hashes por iteración, salidas CSV/JSON, checkpoints versionados y reinicio validado. La búsqueda de destinos todavía es la referencia exhaustiva y se optimizará en el Hito 3.
+La especificación funcional está cerrada y están disponibles los hitos 1 a 3: simulación secuencial, generación reproducible, hashes por iteración, salidas CSV/JSON, checkpoints versionados, reinicio validado e índice espacial de vacantes. La versión híbrida se incorpora en los hitos siguientes.
 
 Los documentos principales son:
 
@@ -58,6 +58,8 @@ OMP_NUM_THREADS=2 mpirun -np 2 ./build/schelling_hybrid --config config/base.con
 ```
 
 El ejecutable secuencial genera el estado inicial y ejecuta la cantidad configurada de iteraciones. El ejecutable híbrido conserva por ahora el arranque validado del Hito 0; la distribución MPI y OpenMP se incorpora en los hitos 4 y 5.
+
+La opción `tamanoBloqueVacantes` del archivo de configuración controla el lado de los bloques del índice espacial. El valor base es 32 celdas.
 
 Para consultar todas las opciones:
 

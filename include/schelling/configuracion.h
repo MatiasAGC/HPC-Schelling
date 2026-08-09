@@ -30,6 +30,7 @@ typedef struct
     double proporcionResidencial;
     double proporcionOcupacion;
     int cantidadZonas;
+    int tamanoBloqueVacantes;
     double pesosSubestratos[CANTIDAD_SUBESTRATOS];
     double tolerancias[CANTIDAD_CLASES][CANTIDAD_CLASES];
 } Configuracion;

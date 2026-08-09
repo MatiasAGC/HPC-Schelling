@@ -200,6 +200,10 @@ static bool asignarValor(Configuracion *configuracion, const char *clave, const 
     {
         return convertirEntero(valor, &configuracion->cantidadZonas);
     }
+    if (strcmp(clave, "tamanoBloqueVacantes") == 0)
+    {
+        return convertirEntero(valor, &configuracion->tamanoBloqueVacantes);
+    }
     if (strcmp(clave, "pesoSubestratoAMas") == 0)
     {
         return convertirReal(valor, &configuracion->pesosSubestratos[SUBESTRATO_A_MAS]);
@@ -293,6 +297,7 @@ void iniciarConfiguracionPredeterminada(Configuracion *configuracion)
     configuracion->proporcionResidencial = 0.885;
     configuracion->proporcionOcupacion = 0.90;
     configuracion->cantidadZonas = 8;
+    configuracion->tamanoBloqueVacantes = 32;
     configuracion->pesosSubestratos[SUBESTRATO_A_MAS] = 8.6;
     configuracion->pesosSubestratos[SUBESTRATO_A_MENOS] = 17.1;
     configuracion->pesosSubestratos[SUBESTRATO_M_MAS] = 21.2;
@@ -429,7 +434,7 @@ bool validarConfiguracion(const Configuracion *configuracion)
 
     if (configuracion->proporcionResidencial < 0.0 || configuracion->proporcionResidencial > 1.0 ||
         configuracion->proporcionOcupacion < 0.0 || configuracion->proporcionOcupacion > 1.0 ||
-        configuracion->cantidadZonas <= 0)
+        configuracion->cantidadZonas <= 0 || configuracion->tamanoBloqueVacantes <= 0)
     {
         registrarError("las proporciones de generacion o la cantidad de zonas son invalidas");
         return false;

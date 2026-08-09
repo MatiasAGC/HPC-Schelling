@@ -17,6 +17,7 @@ add_library(schelling_comun STATIC
     src/common/economia.c
     src/common/generador.c
     src/common/hash.c
+    src/common/indice_vacantes.c
     src/common/modelo.c
     src/common/registro.c
     src/common/salida.c
@@ -96,6 +97,12 @@ if(BUILD_TESTING)
     target_compile_options(prueba_modelo PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
     add_test(NAME modelo COMMAND prueba_modelo)
 
+    add_executable(prueba_indice_vacantes tests/unit/prueba_indice_vacantes.c)
+    target_link_libraries(prueba_indice_vacantes PRIVATE schelling_comun)
+    target_compile_options(prueba_indice_vacantes PRIVATE -Wall -Wextra -Wpedantic -Wconversion
+                                                           -Wshadow)
+    add_test(NAME indice_vacantes COMMAND prueba_indice_vacantes)
+
     add_executable(prueba_vecindario tests/unit/prueba_vecindario.c)
     target_link_libraries(prueba_vecindario PRIVATE schelling_comun)
     target_compile_options(prueba_vecindario PRIVATE -Wall -Wextra -Wpedantic -Wconversion
@@ -104,6 +111,9 @@ if(BUILD_TESTING)
 
     add_test(NAME inicio_secuencial
         COMMAND schelling_seq --config "${CMAKE_SOURCE_DIR}/tests/data/minima.conf"
+    )
+    set_tests_properties(inicio_secuencial PROPERTIES
+        PASS_REGULAR_EXPRESSION "hash 7d65e8c90d52123b"
     )
 
     add_test(NAME argumento_invalido COMMAND schelling_seq --opcion-inexistente)

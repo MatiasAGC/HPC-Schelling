@@ -12,13 +12,13 @@ Los hogares conservan identificador, celda actual, subestrato, clase derivada, i
 
 \subsection{Funciones y organización del código}
 
-El módulo de modelo administra memoria, coordenadas, definición de celdas, ubicación de hogares e invariantes. El generador sintético construye el estado inicial a partir de parámetros y claves aleatorias estables. El módulo de vecindario precalcula una sola vez los desplazamientos de Chebyshev y sus pesos gaussianos. Sobre esas tablas calcula proporciones ponderadas y evalúa las tolerancias cargadas desde el escenario. \pendiente{completar las responsabilidades de simulación, precios, mudanzas y métricas.}
+El módulo de modelo administra memoria, coordenadas, definición de celdas, ubicación de hogares e invariantes. El generador sintético construye el estado inicial a partir de parámetros y claves aleatorias estables. El módulo de vecindario precalcula una sola vez los desplazamientos de Chebyshev y sus pesos gaussianos. Sobre esas tablas calcula proporciones ponderadas y evalúa las tolerancias cargadas desde el escenario. El módulo económico actualiza precios y determina accesibilidad, mientras que el de simulación coordina satisfacción, selección de destinos, resolución de conflictos, mudanzas y métricas. El índice de vacantes mantiene arreglos compactos agrupados por bloques espaciales.
 
 \subsection{Algoritmo}
 
-Cada iteración evalúa satisfacción sobre la ocupación consolidada, actualiza solamente los precios de viviendas vacías y busca un destino para cada hogar insatisfecho no bloqueado. La búsqueda de referencia recorre todas las vacantes, descarta las inaccesibles o insatisfactorias y elige la de menor distancia, con identificador como desempate. Las solicitudes se almacenan sin modificar la grilla. Para cada vivienda se conserva el hogar de mayor ingreso; los empates usan una clave pseudoaleatoria estable y luego el identificador. Finalmente se liberan todos los orígenes ganadores y recién después se ocupan los destinos, por lo que una vivienda liberada no participa hasta el mes siguiente.
+Cada iteración evalúa satisfacción sobre la ocupación consolidada, actualiza solamente los precios de viviendas vacías y busca un destino para cada hogar insatisfecho no bloqueado. Las vacantes se filtran por clase y capacidad de pago y se agrupan en bloques cuadrados. La búsqueda visita anillos de bloques alrededor del origen, evalúa candidatos y elige el de menor distancia, con identificador como desempate. Cuando un candidato está dentro del vecindario del origen se recalcula su satisfacción excluyendo al hogar que desea mudarse. Las solicitudes se almacenan sin modificar la grilla. Para cada vivienda se conserva el hogar de mayor ingreso; los empates usan una clave pseudoaleatoria estable y luego el identificador. Finalmente se liberan todos los orígenes ganadores y recién después se ocupan los destinos, por lo que una vivienda liberada no participa hasta el mes siguiente.
 
-Para $H$ hogares, $V$ viviendas vacías y $K$ desplazamientos del vecindario, esta referencia tiene costo dominante $O(HVK)$ en el peor caso. Esta versión prioriza una semántica comprobable; el índice espacial posterior reduce la cantidad de destinos examinados. \pendiente{agregar el pseudocódigo definitivo después de incorporar el índice espacial.}
+Para $H$ hogares, $V$ viviendas vacías y $K$ desplazamientos del vecindario, la referencia exhaustiva tiene costo dominante $O(HVK)$ en el peor caso. El filtrado requiere $O(VK)$ por clase y la construcción de índices es lineal en la grilla. La búsqueda conserva un peor caso lineal en las vacantes compatibles, pero normalmente termina cuando la distancia mínima al próximo anillo supera la del mejor candidato hallado.
 
 \subsection{Reproducibilidad y checkpoints}
 
@@ -30,7 +30,9 @@ En ejecuciones normales se genera un checkpoint cada 50 iteraciones y se conserv
 
 \subsection{Optimizaciones}
 
-\pendiente{documentar optimizaciones únicamente después de medirlas y validarlas contra la referencia.}
+Los pesos gaussianos y desplazamientos se precalculan al iniciar. Para cada iteración se evalúa una sola vez la aptitud de cada vacante para cada una de las tres clases. Con esos resultados y los siete ingresos base se construye un índice por subestrato que excluye destinos social o económicamente inviables. Cada índice usa un arreglo compacto de identificadores y otro de comienzos por bloque, evitando listas enlazadas y favoreciendo accesos contiguos.
+
+La terminación por distancia usa una cota conservadora respecto al exterior de los anillos ya visitados. Así no altera la elección de destino ni sus desempates. El escenario mínimo produjo los mismos hashes que la referencia exhaustiva: \texttt{dceac07696c2ac27} y \texttt{7d65e8c90d52123b}. Como comprobación de viabilidad, una iteración Release del escenario base de $1024\times640$, con 522351 hogares, demoró 3,98 segundos en el equipo local. Esta medición es diagnóstica; los tiempos reportados como resultados se obtendrán mediante el protocolo experimental definitivo.
 
 \subsection{Convenciones y simplificaciones}
 
@@ -38,4 +40,4 @@ La grilla rectangular es una abstracción y no un mapa de Montevideo. Cada celda
 
 \subsection{Dificultades de implementación}
 
-\pendiente{describir problemas relevantes, diagnóstico y solución; omitir incidencias triviales que no aporten al análisis.}
+La primera versión del índice espacial seguía recorriendo todas las vacantes cuando un hogar no tenía destinos viables, por lo que el caso base superaba un minuto aun para una sola iteración. El perfil algorítmico mostró que agrupar espacialmente no bastaba si los bloques retenían candidatos imposibles. La solución fue precalcular satisfacción y accesibilidad y construir índices separados por subestrato. Se mantuvo una reevaluación local para el caso en que quitar al hogar de su origen cambia el vecindario del destino.

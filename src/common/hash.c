@@ -90,6 +90,7 @@ uint64_t calcularHashConfiguracionModelo(const Configuracion *configuracion)
     hash = agregarReal(hash, configuracion->proporcionResidencial);
     hash = agregarReal(hash, configuracion->proporcionOcupacion);
     hash = agregarEntero(hash, (uint64_t)configuracion->cantidadZonas);
+    hash = agregarEntero(hash, (uint64_t)configuracion->tamanoBloqueVacantes);
 
     for (int subestrato = 0; subestrato < CANTIDAD_SUBESTRATOS; subestrato++)
     {
