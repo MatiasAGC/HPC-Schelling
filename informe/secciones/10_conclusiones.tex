@@ -1,8 +1,10 @@
 \section{Conclusiones y trabajo futuro}
 
-\pendiente{redactar a partir de las preguntas del trabajo y la evidencia obtenida, incluyendo desempeño, escalabilidad y comportamiento del modelo.}
+Se completó un simulador reproducible del modelo extendido de Schelling y dos caminos de ejecución que producen exactamente los mismos estados. La versión secuencial actúa como referencia simple y verificable; la híbrida distribuye franjas mediante MPI y paraleliza con OpenMP la evaluación de satisfacción, precios y destinos. Los hashes idénticos con uno, dos y tres procesos y con configuraciones OpenMP e híbridas, junto con la conservación de hogares y vacantes y el reinicio exacto, respaldan la corrección funcional.
 
-La conclusión deberá comparar explícitamente las versiones secuencial e híbrida e indicar si los resultados funcionales y de desempeño coincidieron con las expectativas previas.
+El resultado de desempeño local coincidió parcialmente con la expectativa. Dos threads casi duplicaron el rendimiento, pero cuatro threads en un único proceso no añadieron mejora. La configuración $2\times4$ alcanzó el mejor tiempo, 1,091~s frente a 3,672~s secuenciales, aunque su eficiencia fue 0,421. La búsqueda siguió dominando el costo; la réplica de catálogos y la comunicación limitan la escalabilidad. En consecuencia, la paralelización resulta útil, pero el speedup no crece linealmente con los recursos. Las mediciones locales no prueban escalabilidad entre nodos y deberán contrastarse en FING antes de formular una conclusión sobre esa plataforma.
+
+Respecto al modelo, el escenario sintético inicial produjo 55,7\% de hogares satisfechos y numerosos conflictos por destinos, lo que confirma que las reglas económicas y de tolerancia generan una dinámica no trivial. Sin embargo, la sensibilidad mediana mostró que quitar ruido de precios o permanencia produjo cambios finales pequeños en satisfacción para una sola semilla. Estos resultados validan el funcionamiento del simulador, pero no permiten inferencias empíricas sobre Montevideo ni conclusiones generales de equilibrio.
 
 \subsection{Trabajo futuro}
 

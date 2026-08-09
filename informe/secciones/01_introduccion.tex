@@ -6,11 +6,11 @@ Este proyecto adapta el modelo a una representación simplificada de Montevideo 
 
 \subsection{Objetivos y contribuciones}
 
-Las contribuciones previstas son una especificación reproducible del modelo, una implementación secuencial de referencia, una versión híbrida MPI/OpenMP y una evaluación de corrección, desempeño y escalabilidad. \pendiente{ajustar las contribuciones a lo efectivamente implementado.}
+Las contribuciones son una especificación reproducible del modelo, una implementación secuencial de referencia, una versión híbrida MPI/OpenMP, checkpoints portables entre ambas versiones, validación por hashes e invariantes y herramientas para automatizar experimentos y ejecutar escenarios independientes con concurrencia controlada. La evaluación compara corrección y desempeño local; la escalabilidad entre nodos se medirá por separado en FING.
 
 \subsection{Motivación computacional}
 
-La evaluación repetida de vecindarios y destinos para cientos de miles de hogares, durante numerosos meses y escenarios, produce un costo suficiente para estudiar paralelismo de memoria distribuida y compartida. \pendiente{cuantificar el costo observado y evitar justificar HPC solamente por el tamaño nominal.}
+La evaluación repetida de vecindarios y destinos para cientos de miles de hogares, durante numerosos meses y escenarios, produce un costo suficiente para estudiar paralelismo de memoria distribuida y compartida. En el escenario base de $1024\times640$ se generaron 522351 hogares; una única iteración secuencial requirió una mediana de 3,672~s y produjo 222341 solicitudes de mudanza. La búsqueda de destinos concentró 3,492~s en el ejecutable híbrido con un solo recurso. Además de acelerar una ejecución, el proyecto debe explorar múltiples semillas y parámetros, por lo que ofrece paralelismo tanto dentro de cada simulación como entre escenarios independientes.
 
 \subsection{Organización del documento}
 
