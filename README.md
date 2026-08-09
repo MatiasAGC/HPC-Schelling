@@ -4,7 +4,7 @@ Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segreg
 
 ## Estado
 
-La especificación funcional está cerrada y están disponibles los hitos 1 a 6: simulación secuencial, reproducibilidad, persistencia, índice espacial, distribución MPI, paralelismo OpenMP y automatización experimental con resultados locales. Las mediciones en FING se incorporarán cuando se habilite la conexión.
+La especificación funcional está cerrada y están implementados los hitos 1 a 7: simulación secuencial, reproducibilidad, persistencia, índice espacial, distribución MPI, paralelismo OpenMP, automatización experimental y ejecución concurrente de escenarios. Las mediciones en FING se incorporarán cuando se habilite la conexión.
 
 Los documentos principales son:
 
@@ -93,3 +93,12 @@ python3 scripts/ejecutar_experimentos.py --config config/base.conf --iteraciones
 ```
 
 Los resultados crudos se guardan bajo `results/`, que está ignorado por Git. Se puede usar `config/mediana.conf` para una revisión rápida antes de reservar recursos de FING.
+
+Varios escenarios independientes pueden ejecutarse concurrentemente con un límite explícito de trabajos:
+
+```bash
+python3 scripts/ejecutar_escenarios.py --trabajos 2 \
+    config/mediana.conf config/mediana_sin_ruido.conf config/mediana_sin_permanencia.conf
+```
+
+El archivo `resumen_escenarios.csv` combina los resultados sin mezclar los directorios ni las salidas de cada simulación.

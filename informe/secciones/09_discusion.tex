@@ -6,6 +6,8 @@ La búsqueda de destinos domina el tiempo incluso después del índice espacial.
 
 La eficiencia cae al aumentar recursos porque la preparación e índices se replican parcialmente y las colectivas operan sobre arreglos globales. Los 23,2~MB comunicados con dos procesos son pequeños frente al costo de búsqueda en esta máquina, pero crecerán con la grilla y la cantidad de procesos. Las mediciones en FING permitirán separar efectos propios de WSL2 y evaluar escalabilidad entre nodos.
 
+El desbalance de 1,002 no justifica por ahora reemplazar las franjas uniformes por cortes dinámicos según población. Como extensión se priorizó el paralelismo entre escenarios: un coordinador ejecuta configuraciones independientes concurrentemente, limita la cantidad de trabajos y combina sus resúmenes. Esta capa resulta útil para sensibilidad y múltiples semillas sin introducir comunicación entre simulaciones.
+
 \subsection{Amenazas a la validez}
 
 Se considerarán la simplificación espacial, la agregación socioeconómica, los parámetros hipotéticos de tolerancia, la calidad de los datos, la variabilidad de las mediciones y las diferencias entre plataformas.

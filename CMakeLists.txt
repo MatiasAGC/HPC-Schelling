@@ -57,6 +57,10 @@ if(BUILD_TESTING)
             COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/ejecutar_experimentos.py"
                     --help
         )
+        add_test(NAME ayuda_escenarios
+            COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/ejecutar_escenarios.py"
+                    --help
+        )
     endif()
 
     add_executable(prueba_configuracion tests/unit/prueba_configuracion.c)
