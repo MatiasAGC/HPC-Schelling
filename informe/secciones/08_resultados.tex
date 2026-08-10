@@ -60,7 +60,65 @@ Una pasada adicional de los 120 meses mostró un comportamiento diferente. La ve
 
 \subsection{Desempeño en FING}
 
-\pendiente{incorporar tabla y gráfica de escalabilidad, eficiencia, desbalance y comunicaciones.}
+La Tabla~\ref{tab:resultados-fing} muestra las medianas de cinco repeticiones
+del escenario completo de 120 meses. Todas las muestras produjeron el hash
+\texttt{9de3a86b1efdd900}, igual al de la versión secuencial.
+
+\begin{table}[ht]
+\centering
+\caption{Escalabilidad fuerte en FING para 120 meses}
+\label{tab:resultados-fing}
+\begin{tabular}{rrrrrr}
+\toprule
+MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Comunicación \\
+\midrule
+-- & -- & 28,584 & 1,000 & 1,000 & -- \\
+1 & 1 & 32,141 & 0,889 & 0,889 & 0 \\
+1 & 2 & 22,636 & 1,263 & 0,631 & 0 \\
+1 & 4 & 20,623 & 1,386 & 0,347 & 0 \\
+2 & 1 & 35,551 & 0,804 & 0,402 & 2,79 GB \\
+2 & 2 & 34,758 & 0,822 & 0,206 & 2,79 GB \\
+2 & 4 & 32,884 & 0,869 & 0,109 & 2,79 GB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=\columnwidth,
+    height=0.62\columnwidth,
+    xlabel={Recursos de cómputo},
+    ylabel={Speedup},
+    xmin=1,xmax=8,
+    ymin=0,ymax=2,
+    xtick={1,2,4,8},
+    grid=major,
+    legend style={font=\scriptsize,at={(0.97,0.97)},anchor=north east}
+]
+\addplot[dashed,gray] coordinates {(1,1) (2,2)};
+\addlegendentry{Ideal}
+\addplot[mark=*,blue] coordinates {(1,0.889) (2,1.263) (4,1.386)};
+\addlegendentry{Un nodo}
+\addplot[mark=square*,red] coordinates {(2,0.804) (4,0.822) (8,0.869)};
+\addlegendentry{Dos nodos}
+\end{axis}
+\end{tikzpicture}
+\caption{Speedup en FING respecto a la versión secuencial.}
+\label{fig:speedup-fing}
+\end{figure}
+
+El menor tiempo fue 20,623~s con un proceso y cuatro hilos, un speedup de
+1,386. Dos hilos, que corresponden a los dos núcleos físicos del equipo,
+alcanzaron 22,636~s. Los cuatro hilos aprovecharon además los hilos lógicos del
+procesador, pero la mejora adicional fue menor.
+
+Las configuraciones de dos procesos fueron más lentas que la secuencial. En
+los 120 meses intercambiaron 2,79~GB lógicos y atendieron 195391 solicitudes
+remotas. El desbalance medio fue solamente 1,005, por lo que la diferencia no
+se explica por una mala división del trabajo. El costo proviene principalmente
+del intercambio y de mantener datos globales en ambos procesos.
 
 \subsection{Comportamiento del modelo}
 

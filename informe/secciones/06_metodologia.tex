@@ -6,15 +6,21 @@ El entorno local de desarrollo es WSL2 con Ubuntu 24.04 x86-64 sobre un AMD Ryze
 
 El programa se escribió en C11 y se compiló con advertencias estrictas. Durante el desarrollo también se revisaron el formato, posibles errores de memoria y usos incorrectos de variables. Los comandos principales de compilación y ejecución se conservan en el archivo \texttt{README.md}.
 
-\pendiente{documentar nodos, scheduler, compilador y bibliotecas de la infraestructura de FING.}
-
-Según el material del curso, MPI se habilita en FING mediante el módulo \texttt{mpi/mpich-x86\_64}; los binarios se compilan con \texttt{mpicc} y se ejecutan mediante \texttt{mpirun} con una lista o archivo de hosts. Esta información se verificará en las máquinas antes de realizar mediciones.
+Las mediciones de FING se realizaron el 9 de agosto de 2026 en los equipos
+\texttt{pcunix40} y \texttt{pcunix42}. Cada equipo posee un Intel Core i3-4170
+a 3,70~GHz, dos núcleos físicos, cuatro hilos lógicos, 15~GiB de memoria y
+3~MiB de caché L3. Ambos ejecutaban Fedora Linux con kernel 6.19.14. Se utilizó
+GCC 15.2.1 y MPICH 4.2.2, habilitado mediante el módulo
+\texttt{mpi/mpich-x86\_64}. Los trabajos se lanzaron directamente por SSH sobre
+los dos equipos disponibles, sin un planificador. El equipo \texttt{lulu} se
+utilizó únicamente como punto de acceso. MPICH se ejecutó con el proveedor TCP
+para utilizar la red Ethernet de las pcunix.
 
 \subsection{Configuraciones y procedimiento}
 
 Se mantiene fijo el problema y se incrementan procesos MPI y threads OpenMP para evaluar escalabilidad fuerte. Cada configuración incluye una ejecución de calentamiento y cinco repeticiones; se reportan mediana, mínimo, máximo y desviación estándar poblacional. Los checkpoints se desactivan y se exige el mismo hash final en todas las muestras.
 
-La validación usa tres tamaños: mínimo de $8\times6$ durante dos iteraciones, mediano de $256\times160$ durante diez y base de $1024\times640$. Todos emplean la misma semilla por comparación. La primera medición local usa una iteración para comparar el tramo de mayor actividad. También se mide la ejecución completa de 120 meses, porque el trabajo cambia a medida que disminuyen las mudanzas. En FING se realizará primero una pasada corta para estimar el tiempo antes de repetir las 120 iteraciones en todas las configuraciones.
+La validación usa tres tamaños: mínimo de $8\times6$ durante dos iteraciones, mediano de $256\times160$ durante diez y base de $1024\times640$. Todos emplean la misma semilla por comparación. La primera medición local usa una iteración para comparar el tramo de mayor actividad. También se mide la ejecución completa de 120 meses, porque el trabajo cambia a medida que disminuyen las mudanzas. En FING se realizó primero una pasada corta y luego se repitieron las 120 iteraciones en todas las configuraciones.
 
 \subsection{Métricas}
 

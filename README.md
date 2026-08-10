@@ -4,7 +4,7 @@ Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segreg
 
 ## Estado
 
-La especificación funcional está cerrada y están implementados los hitos 1 a 7: simulación secuencial, reproducibilidad, persistencia, índice espacial, distribución MPI, paralelismo OpenMP, automatización experimental y ejecución concurrente de escenarios. Las mediciones en FING se incorporarán cuando se habilite la conexión.
+La especificación funcional está cerrada y están implementados los hitos 1 a 7: simulación secuencial, reproducibilidad, persistencia, índice espacial, distribución MPI, paralelismo OpenMP, automatización experimental y ejecución concurrente de escenarios. También se completaron las mediciones secuenciales e híbridas en dos máquinas de FING.
 
 Los documentos principales son:
 
