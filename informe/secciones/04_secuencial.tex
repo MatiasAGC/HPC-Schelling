@@ -30,7 +30,7 @@ En ejecuciones normales se genera un checkpoint cada 50 iteraciones y se conserv
 
 \subsection{Optimizaciones}
 
-Los pesos gaussianos y desplazamientos se precalculan al iniciar. Para cada iteración se evalúa una sola vez la aptitud de cada vacante para cada una de las tres clases. Con esos resultados y los siete ingresos base se construye un índice por subestrato que excluye destinos social o económicamente inviables. Cada índice usa un arreglo compacto de identificadores y otro de comienzos por bloque, evitando listas enlazadas y favoreciendo accesos contiguos.
+Los pesos gaussianos y desplazamientos se calculan una sola vez al iniciar. En cada iteración se revisa una vez si cada vivienda vacía sirve para cada una de las tres clases. Con esos resultados y los siete ingresos base se construye un índice por nivel social que descarta los destinos que no cumplen las reglas sociales o económicas. Si un índice queda vacío, la búsqueda responde de inmediato que no existe un destino. Esto evita recorrer todos los bloques para miles de hogares cuando ninguna vivienda es posible.
 
 La terminación por distancia usa una cota conservadora respecto al exterior de los anillos ya visitados. Así no altera la elección de destino ni sus desempates. El escenario mínimo produjo los mismos hashes que la referencia exhaustiva: \texttt{dceac07696c2ac27} y \texttt{7d65e8c90d52123b}. Como comprobación de viabilidad, una iteración Release del escenario base de $1024\times640$, con 522351 hogares, demoró 3,98 segundos en el equipo local. Esta medición es diagnóstica; los tiempos reportados como resultados se obtendrán mediante el protocolo experimental definitivo.
 

@@ -56,13 +56,15 @@ El costo del ejecutable híbrido con un recurso fue 0,9~\% mayor que el secuenci
 
 Con dos procesos el desbalance medio de trabajo fue 1,002, consistente con la distribución sintética casi uniforme. Se contabilizaron 4373 solicitudes remotas y 23,2~MB lógicos comunicados durante la iteración.
 
+Una pasada adicional de los 120 meses mostró un comportamiento diferente. La versión secuencial demoró entre 32 y 36~s. La configuración $2\times4$ demoró entre 19,8 y 26,0~s; su mejor speedup observado fue 1,63. Esta comparación tiene una sola muestra por configuración y se usa para estimar la duración, no como resultado final. La menor mejora se explica porque, una vez que dejan de existir destinos válidos, las fases comunes y la comunicación tienen mayor peso que la búsqueda paralela.
+
 \subsection{Desempeño en FING}
 
 \pendiente{incorporar tabla y gráfica de escalabilidad, eficiencia, desbalance y comunicaciones.}
 
 \subsection{Comportamiento del modelo}
 
-En la primera iteración base, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas y 194083 rechazadas por conflicto; otros 8863 hogares insatisfechos no hallaron destino viable. Estas cifras describen el estado sintético inicial y no constituyen todavía un análisis de equilibrio.
+En la primera iteración base, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas y 194083 rechazadas por conflicto; otros 8863 hogares insatisfechos no hallaron destino viable. En el mes 14 se alcanzaron 333477 hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto hasta el mes 120, 188874 hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. Las viviendas se liberaron correctamente; el estado quedó trabado por las reglas del escenario sintético.
 
 \subsection{Sensibilidad}
 

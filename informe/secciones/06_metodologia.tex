@@ -14,7 +14,7 @@ Según el material del curso, MPI se habilita en FING mediante el módulo \textt
 
 Se mantiene fijo el problema y se incrementan procesos MPI y threads OpenMP para evaluar escalabilidad fuerte. Cada configuración incluye una ejecución de calentamiento y cinco repeticiones; se reportan mediana, mínimo, máximo y desviación estándar poblacional. Los checkpoints se desactivan y se exige el mismo hash final en todas las muestras.
 
-La validación usa tres tamaños: mínimo de $8\times6$ durante dos iteraciones, mediano de $256\times160$ durante diez y base de $1024\times640$. Todos emplean la misma semilla por comparación. La medición local preliminar usa una iteración base para limitar interferencias del entorno interactivo; en FING se aumentará la cantidad de iteraciones después de estimar el tiempo de reserva.
+La validación usa tres tamaños: mínimo de $8\times6$ durante dos iteraciones, mediano de $256\times160$ durante diez y base de $1024\times640$. Todos emplean la misma semilla por comparación. La primera medición local usa una iteración para comparar el tramo de mayor actividad. También se mide la ejecución completa de 120 meses, porque el trabajo cambia a medida que disminuyen las mudanzas. En FING se realizará primero una pasada corta para estimar el tiempo antes de repetir las 120 iteraciones en todas las configuraciones.
 
 \subsection{Métricas}
 

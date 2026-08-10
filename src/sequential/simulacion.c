@@ -78,6 +78,11 @@ static int buscarDestinoIndice(const Modelo *modelo, const Vecindario *vecindari
     int radioMaximo =
         indice->bloquesAncho > indice->bloquesAlto ? indice->bloquesAncho : indice->bloquesAlto;
 
+    if (indice->cantidadVacantes == 0)
+    {
+        return ID_INVALIDO;
+    }
+
     obtenerCoordenadas(modelo, hogar->idCelda, &filaOrigen, &columnaOrigen);
     filaBloqueOrigen = filaOrigen / indice->tamanoBloque;
     columnaBloqueOrigen = columnaOrigen / indice->tamanoBloque;
