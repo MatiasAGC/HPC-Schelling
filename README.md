@@ -50,7 +50,12 @@ La prueba híbrida requiere una instalación MPI funcional. Los controles que no
 ctest --test-dir build --output-on-failure -E '^mpi_'
 ```
 
-## Ejecución actual
+## Ejecución
+
+`config/base.conf` conserva el escenario funcional con las restricciones
+originales. `config/hpc.conf` es la instancia sintética de mayor resolución
+utilizada para evaluar rendimiento; mantiene las proporciones sociales, pero su
+cantidad de celdas no representa la población real de Montevideo.
 
 ```bash
 ./build/schelling_seq --config config/base.conf --validate
@@ -99,10 +104,14 @@ python3 scripts/ejecutar_experimentos.py --config config/base.conf \
     --secuencial build-make/schelling_seq \
     --hibrido build-make/schelling_hybrid \
     --salida results/fing --iteraciones 10 --hostfile mis_hosts \
-    --configuraciones 1x1,1x2,1x4,2x2,2x4,4x2,4x4
+    --configuraciones 1x1,1x2,1x4,2x2,2x4
 ```
 
 Cada línea de `mis_hosts` debe contener un nombre habilitado por el curso. Conviene realizar primero una ejecución corta con una repetición para estimar cuánto demorará la campaña completa.
+
+La instancia principal de rendimiento se ejecuta sustituyendo la configuración
+por `config/hpc.conf`. En FING se debe definir además `FI_PROVIDER=tcp` para las
+pcunix utilizadas en este proyecto.
 
 Los resultados crudos se guardan bajo `results/`, que está ignorado por Git. Se puede usar `config/mediana.conf` para una revisión rápida antes de reservar recursos de FING.
 
