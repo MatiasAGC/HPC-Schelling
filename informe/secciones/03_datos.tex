@@ -16,7 +16,7 @@ La información municipal de la Intendencia basada en ECH 2023 se revisó como r
 
 Además del escenario de Montevideo se utilizan casos sintéticos pequeños y medianos para revisar las reglas del modelo. Toda generación registra la semilla y los valores usados.
 
-El generador recorre dos veces la grilla. En la primera pasada determina de forma reproducible cuáles celdas son residenciales y cuáles están ocupadas, obteniendo así la cantidad exacta de hogares para reservar arreglos contiguos. En la segunda construye celdas y hogares, asigna zonas mediante franjas verticales y selecciona subestratos con los pesos configurados. El escenario base usa proporción residencial 0,885 y ocupación 0,90; los conteos efectivos dependen de la semilla y se informan al iniciar cada ejecución.
+El generador recorre dos veces la grilla. En la primera pasada determina de forma reproducible cuáles celdas son residenciales y cuáles están ocupadas. Así obtiene la cantidad exacta de hogares antes de reservar memoria. En la segunda pasada construye las celdas y los hogares, asigna zonas mediante franjas verticales y selecciona los grupos sociales con los pesos configurados. El escenario funcional usa proporción residencial 0,885 y ocupación 0,90. La instancia de rendimiento conserva la proporción residencial y reduce la ocupación a 0,80, por lo que mantiene 20\% de viviendas vacías. Cada mudanza ocupa una vivienda y libera otra, de modo que la cantidad de vacantes se conserva. Los conteos efectivos dependen de la semilla y se informan al iniciar cada ejecución.
 
 \subsection{Supuestos y limitaciones de los datos}
 

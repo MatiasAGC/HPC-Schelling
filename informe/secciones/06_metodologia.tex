@@ -2,7 +2,7 @@
 
 \subsection{Plataformas}
 
-El entorno local de desarrollo es WSL2 con Ubuntu 24.04 x86-64 sobre un AMD Ryzen 5 3600 de seis núcleos y doce threads, 7,7~GiB de memoria y 16~MiB de caché L3. Se utilizó GCC 13.3.0 y Open MPI 4.1.6. El proyecto se construye principalmente con CMake y mantiene un Makefile portable para el entorno académico.
+El entorno local de desarrollo es WSL2 con Ubuntu 24.04 x86-64 sobre un AMD Ryzen 5 3600 de seis núcleos y doce hilos, 7,7~GiB de memoria y 16~MiB de caché L3. Se utilizó GCC 13.3.0 y Open MPI 4.1.6. El proyecto se construye principalmente con CMake y mantiene un Makefile portable para el entorno académico.
 
 El programa se escribió en C11 y se compiló con advertencias estrictas. Durante el desarrollo también se revisaron el formato, posibles errores de memoria y usos incorrectos de variables. Los comandos principales de compilación y ejecución se conservan en el archivo \texttt{README.md}.
 
@@ -18,9 +18,13 @@ para utilizar la red Ethernet de las pcunix.
 
 \subsection{Configuraciones y procedimiento}
 
-Se mantiene fijo el problema y se incrementan procesos MPI y threads OpenMP para evaluar escalabilidad fuerte. Cada configuración incluye una ejecución de calentamiento y cinco repeticiones; se reportan mediana, mínimo, máximo y desviación estándar poblacional. Los checkpoints se desactivan y se exige el mismo hash final en todas las muestras.
+Para medir escalabilidad fuerte se mantiene fija la instancia y se cambia la cantidad de procesos MPI e hilos OpenMP. Los checkpoints se desactivan y todas las configuraciones deben terminar con el mismo hash.
 
-La validación usa tres tamaños: mínimo de $8\times6$ durante dos iteraciones, mediano de $256\times160$ durante diez y base de $1024\times640$. Todos emplean la misma semilla por comparación. La primera medición local usa una iteración para comparar el tramo de mayor actividad. También se mide la ejecución completa de 120 meses, porque el trabajo cambia a medida que disminuyen las mudanzas. En FING se realizó primero una pasada corta y luego se repitieron las 120 iteraciones en todas las configuraciones.
+La validación funcional usa tres tamaños: mínimo de $8\times6$, mediano de $256\times160$ y funcional de $1024\times640$. Las primeras mediciones de rendimiento también usaron el escenario funcional. En ellas se ejecutó un calentamiento y cinco repeticiones por configuración, y se informó la mediana.
+
+Las restricciones del escenario funcional dejaron de producir solicitudes de mudanza después del mes 14. Ese caso sirve para comprobar las reglas, pero ofrece poco trabajo para estudiar paralelismo. Por ese motivo se creó la instancia \texttt{hpc.conf}, de $4096\times2560$ celdas y 240 iteraciones. Mantiene la distribución social, las preferencias y la regla económica, pero usa 20\% de viviendas vacías, permanencia cero, financiación de 60\%, plazo de 360 meses y un límite de cuota de 40\% del ingreso. Estas decisiones permiten una evolución más larga. La grilla es una carga sintética y no una estimación de la cantidad de viviendas de Montevideo.
+
+Debido a la duración de la instancia grande, la campaña principal realiza una ejecución de cada configuración. Las mediciones más pequeñas y repetidas se conservan como referencia de variación. Se comparan la versión secuencial y las configuraciones $1\times1$, $1\times2$, $1\times4$, $2\times1$, $2\times2$ y $2\times4$. El primer número indica procesos MPI y el segundo, hilos OpenMP por proceso.
 
 \subsection{Métricas}
 
@@ -32,4 +36,4 @@ También se miden tiempos máximos por fase, desbalance $L=\max_i W_i/\overline{
 
 \subsection{Reproducibilidad}
 
-El script \texttt{scripts/ejecutar\_experimentos.py} crea un directorio por calentamiento y repetición, ejecuta las versiones secuencial e híbrida, valida hashes y produce \texttt{resumen.csv}. Fija \texttt{OMP\_PLACES=cores}, \texttt{OMP\_PROC\_BIND=close} y la cantidad de threads de cada configuración. Los resultados crudos no se versionan; el CSV consolidado utilizado por el informe se copia a \texttt{informe/datos} junto con el código y la configuración que permiten regenerarlo.
+El script \texttt{scripts/ejecutar\_experimentos.py} crea un directorio por ejecución, inicia las versiones secuencial e híbrida, compara los hashes y produce \texttt{resumen.csv}. Fija \texttt{OMP\_PLACES=cores}, \texttt{OMP\_PROC\_BIND=close} y la cantidad de hilos de cada configuración. Los resultados crudos no se versionan; el CSV usado por el informe se copia a \texttt{informe/datos} junto con la configuración necesaria para repetirlo.

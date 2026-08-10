@@ -10,7 +10,7 @@ El proyecto aporta una definición precisa del modelo, una versión secuencial d
 
 \subsection{Motivación computacional}
 
-La evaluación repetida de vecindarios y destinos para cientos de miles de hogares, durante numerosos meses y escenarios, produce un costo suficiente para estudiar paralelismo de memoria distribuida y compartida. En el escenario base de $1024\times640$ se generaron 522351 hogares; una única iteración secuencial requirió una mediana de 3,672~s y produjo 222341 solicitudes de mudanza. La búsqueda de destinos concentró 3,492~s en el ejecutable híbrido con un solo recurso. Además de acelerar una ejecución, el proyecto debe explorar múltiples semillas y parámetros, por lo que ofrece paralelismo tanto dentro de cada simulación como entre escenarios independientes.
+La evaluación repetida de vecindarios y destinos tiene un costo suficiente para estudiar memoria compartida y distribuida. El escenario inicial de $1024\times640$ permitió validar el modelo, pero varias restricciones juntas redujeron las mudanzas después de pocas iteraciones. Para la evaluación de rendimiento se agregó una instancia sintética de $4096\times2560$. Esta instancia conserva las proporciones sociales, pero aumenta el trabajo disponible para repartir entre procesos e hilos. El proyecto también permite ejecutar escenarios independientes de forma concurrente.
 
 \subsection{Organización del documento}
 

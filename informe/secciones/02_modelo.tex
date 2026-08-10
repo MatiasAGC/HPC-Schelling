@@ -4,7 +4,7 @@
 
 Montevideo se representa mediante una grilla bidimensional rectangular con celdas residenciales y no residenciales, siguiendo la abstracción espacial del modelo clásico de Schelling. Una celda residencial contiene como máximo una vivienda, que puede estar ocupada o vacía. Los hogares se clasifican en siete subestratos y tres clases socioeconómicas.
 
-El escenario completo inicial utiliza $1024\times640$ celdas. Sus coordenadas solo indican cercanía dentro del modelo y no son ubicaciones reales de Montevideo. La grilla se divide en ocho franjas para representar zonas diferentes, pero estas franjas no corresponden a los municipios reales. La grilla utiliza bordes cerrados: los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
+El escenario funcional inicial utiliza $1024\times640$ celdas. La instancia principal de rendimiento utiliza $4096\times2560$. En ambos casos las coordenadas solo indican cercanía dentro del modelo y no son ubicaciones reales de Montevideo. La grilla grande tampoco representa una cantidad real de viviendas: es una instancia sintética utilizada para repartir suficiente trabajo. La grilla se divide en ocho franjas, pero estas franjas no corresponden a los municipios reales. Los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
 
 \subsection{Vecindario y ponderación}
 
@@ -12,12 +12,12 @@ Para una celda residencial $c$, el vecindario de radio $r$ se define como
 \begin{equation}
 N_r(c)=\{c'\in C_R : d(c,c')\leq r\}.
 \end{equation}
-La influencia disminuye con la distancia mediante un kernel gaussiano,
+La influencia disminuye con la distancia mediante una función gaussiana,
 \begin{equation}
 w(c,c')=\exp\left(-\frac{d(c,c')^2}{2\sigma^2}\right).
 \end{equation}
 
-El escenario base utiliza pertenencia de Chebyshev con $r=2$, por lo que considera un cuadrado de hasta 24 vecinos, y calcula el peso con distancia euclidiana y $\sigma=1{,}0$. Separar ambas métricas permite un recorrido rectangular eficiente y, a la vez, asignar menor influencia a diagonales y celdas lejanas. Como referencia se evaluará una variante clásica con $r=1$ y ponderación uniforme.
+Los escenarios usan distancia de Chebyshev con $r=2$, por lo que consideran un cuadrado de hasta 24 vecinos. El peso se calcula con distancia euclidiana y $\sigma=1{,}0$, de modo que los vecinos más lejanos influyen menos. Una variante más cercana al modelo clásico, con radio 1 y pesos uniformes, queda como trabajo futuro.
 
 \subsection{Satisfacción y tolerancias}
 
@@ -25,7 +25,7 @@ La proporción ponderada de cada clase se compara con una matriz configurable de
 
 Cuando no existe ningún hogar vecino, la unidad familiar se considera satisfecha por aislamiento. La misma regla se aplica al evaluar una vivienda candidata y estos casos se contabilizan por separado en las métricas. Esta convención evita asignar proporciones artificiales a un denominador vacío.
 
-La configuración base exige para una unidad de clase alta al menos 70\% de vecinos altos, como máximo 30\% medios y 5\% bajos; para una unidad media, como máximo 70\% altos, al menos 50\% medios y como máximo 40\% bajos; y para una unidad baja, como máximo 80\% altos, 90\% medios y al menos 2\% bajos. Todas las condiciones de la fila deben cumplirse simultáneamente.
+Una unidad de clase alta exige al menos 70\% de vecinos altos, como máximo 30\% medios y 5\% bajos. Una unidad media exige como máximo 70\% altos, al menos 50\% medios y como máximo 40\% bajos. Una unidad baja exige como máximo 80\% altos, 90\% medios y al menos 2\% bajos. Todas las condiciones de la clase deben cumplirse al mismo tiempo.
 
 \subsection{Precios y restricción económica}
 
@@ -43,4 +43,4 @@ La configuración base adopta $\beta_1=0{,}40$, $\beta_2=0{,}60$ y $\rho=0{,}30$
 
 La simulación es síncrona. Los hogares insatisfechos y no bloqueados solicitan destinos accesibles; los conflictos se resuelven de forma determinista antes de aplicar simultáneamente las mudanzas. Una vivienda liberada queda disponible en la iteración siguiente.
 
-Después de mudarse en el mes $t$, un hogar permanece bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. Su satisfacción se continúa evaluando durante ese período. El parámetro es configurable y se considera una variante sin permanencia mínima.
+En el escenario funcional, un hogar que se muda queda bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. La instancia de rendimiento usa permanencia cero porque las pruebas iniciales mostraron que combinar este bloqueo con las demás restricciones dejaba al sistema sin destinos rápidamente.

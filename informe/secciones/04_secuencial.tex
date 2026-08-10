@@ -6,13 +6,13 @@ El código separa la lectura de argumentos, la configuración y la escritura de 
 
 \subsection{Estructuras de datos}
 
-La grilla y los hogares se almacenan en arreglos contiguos separados. El identificador global de una celda coincide con su posición en el arreglo y sigue un recorrido por filas; por ello las coordenadas se derivan mediante división y resto sin almacenarlas en cada celda. Cada celda conserva tipo, zona, precio e identificador del hogar ocupante. El valor centinela $-1$ representa una vivienda vacía, evitando mantener un segundo indicador de ocupación que pudiera contradecirlo.
+La grilla y los hogares se almacenan en arreglos contiguos separados. El identificador global de una celda coincide con su posición en el arreglo y sigue un recorrido por filas; por ello las coordenadas se derivan mediante división y resto sin almacenarlas en cada celda. Cada celda conserva tipo, zona, precio e identificador del hogar ocupante. El valor especial $-1$ representa una vivienda vacía. Así se evita mantener otro indicador de ocupación que pudiera contradecirlo.
 
 Cada hogar guarda su identificador, celda actual, nivel social, clase, ingreso, bloqueo y satisfacción. Al revisar un estado se comprueba que el hogar y la celda se señalen entre sí, que una celda no residencial esté vacía y que cada hogar tenga exactamente una vivienda.
 
 \subsection{Funciones y organización del código}
 
-El módulo de modelo administra memoria, coordenadas, definición de celdas, ubicación de hogares e invariantes. El generador sintético construye el estado inicial a partir de parámetros y claves aleatorias estables. El módulo de vecindario precalcula una sola vez los desplazamientos de Chebyshev y sus pesos gaussianos. Sobre esas tablas calcula proporciones ponderadas y evalúa las tolerancias cargadas desde el escenario. El módulo económico actualiza precios y determina accesibilidad, mientras que el de simulación coordina satisfacción, selección de destinos, resolución de conflictos, mudanzas y métricas. El índice de vacantes mantiene arreglos compactos agrupados por bloques espaciales.
+El módulo de modelo administra memoria, coordenadas, celdas, hogares y reglas de consistencia. El generador sintético construye el estado inicial a partir de parámetros y claves aleatorias estables. El módulo de vecindario calcula una sola vez los desplazamientos y sus pesos. El módulo económico actualiza precios y determina accesibilidad. Finalmente, el módulo de simulación coordina satisfacción, búsqueda de destinos, conflictos, mudanzas y métricas. El índice de vacantes agrupa las viviendas disponibles en bloques espaciales.
 
 \subsection{Algoritmo}
 
@@ -24,9 +24,9 @@ Para $H$ hogares, $V$ viviendas vacías y $K$ desplazamientos del vecindario, la
 
 El generador pseudoaleatorio no mantiene estado mutable. Una mezcla SplitMix64 recibe una clave compuesta por semilla, iteración, identificador de entidad, propósito y número de muestra. Los 53 bits superiores del resultado se convierten a un valor uniforme en el intervalo abierto $(0,1)$. Para el ruido normal se aplica Box--Muller a dos uniformes y luego se trunca el resultado al límite configurado. Separar los propósitos de tipo de celda, ocupación, subestrato, ruido y desempate evita que agregar una muestra a una fase desplace las secuencias de las restantes. Existen vectores de prueba fijos para la función de mezcla.
 
-El checkpoint binario comienza con firma y versión, continúa con la próxima iteración, dimensiones, cantidad de hogares, hash de configuración y hash de estado, y serializa cada campo de celdas y hogares sin incluir relleno de estructuras. Se escribe primero un archivo temporal y solo se publica mediante renombrado al finalizar. Al cargar se comprueban firma, versión, configuración compatible, longitud exacta, invariantes y hash. La cantidad total de iteraciones y la política de checkpoints no integran el hash de configuración, permitiendo extender una ejecución restaurada.
+El checkpoint binario guarda firma, versión, próxima iteración, dimensiones, cantidad de hogares y códigos de verificación de la configuración y del estado. También guarda cada campo de las celdas y los hogares. Se escribe primero un archivo temporal y se renombra al finalizar. Al cargarlo se revisan su versión, longitud, reglas de consistencia y códigos de verificación. La cantidad total de iteraciones puede aumentarse al continuar una ejecución.
 
-En ejecuciones normales se genera un checkpoint cada 50 iteraciones y se conservan los dos últimos completos. La escritura usa archivos temporales y un manifiesto final para que un estado parcial no sea reiniciable. En los benchmarks los checkpoints se desactivan para evitar que la E/S altere la comparación de tiempos.
+En el escenario funcional se genera un checkpoint cada 50 iteraciones y se conservan los dos últimos completos. Cada estado se escribe primero en un archivo temporal y se renombra solamente cuando está completo. En las mediciones de rendimiento los checkpoints se desactivan para que la escritura en disco no altere los tiempos.
 
 \subsection{Optimizaciones}
 
@@ -36,7 +36,7 @@ La terminación por distancia usa una cota conservadora respecto al exterior de 
 
 \subsection{Convenciones y simplificaciones}
 
-La grilla rectangular es una abstracción y no un mapa de Montevideo. Cada celda residencial representa una vivienda discreta, sin superficie física asociada. Los datos oficiales se conservan como cantidades y distribuciones agregadas por zona. Los índices comienzan en cero, las celdas se ordenan por filas y los bordes son cerrados: todo desplazamiento exterior se descarta.
+La grilla rectangular es una abstracción y no un mapa de Montevideo. Cada celda residencial representa una vivienda del simulador, sin superficie física asociada. Las proporciones sociales oficiales se aplican al conjunto de hogares. Las franjas de la grilla son sintéticas y no contienen datos oficiales por zona. Los índices comienzan en cero, las celdas se ordenan por filas y todo desplazamiento exterior se descarta.
 
 \subsection{Dificultades de implementación}
 

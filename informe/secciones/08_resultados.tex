@@ -52,16 +52,16 @@ La mediana secuencial fue 3,672~s. La muestra máxima alcanzó 5,979~s, mientras
 
 \subsubsection{Versión híbrida}
 
-El costo del ejecutable híbrido con un recurso fue 0,9~\% mayor que el secuencial. Dos threads alcanzaron un speedup de 1,964, pero cuatro threads dentro de un solo proceso no mejoraron ese valor. La configuración $2\times4$ obtuvo el menor tiempo, 1,091~s, y un speedup de 3,366. En ella la búsqueda consumió 0,906~s, la preparación 0,057~s, los índices 0,086~s, la comunicación 0,041~s y la consolidación 0,019~s.
+El costo del ejecutable híbrido con un recurso fue 0,9~\% mayor que el secuencial. Dos hilos alcanzaron una mejora de 1,964, pero cuatro hilos dentro de un solo proceso no mejoraron ese valor. La configuración $2\times4$ obtuvo el menor tiempo, 1,091~s, y una mejora de 3,366. En ella la búsqueda consumió 0,906~s, la preparación 0,057~s, los índices 0,086~s, la comunicación 0,041~s y la consolidación 0,019~s.
 
 Con dos procesos el desbalance medio de trabajo fue 1,002, consistente con la distribución sintética casi uniforme. Se contabilizaron 4373 solicitudes remotas y 23,2~MB lógicos comunicados durante la iteración.
 
 Una pasada adicional de los 120 meses mostró un comportamiento diferente. La versión secuencial demoró entre 32 y 36~s. La configuración $2\times4$ demoró entre 19,8 y 26,0~s; su mejor speedup observado fue 1,63. Esta comparación tiene una sola muestra por configuración y se usa para estimar la duración, no como resultado final. La menor mejora se explica porque, una vez que dejan de existir destinos válidos, las fases comunes y la comunicación tienen mayor peso que la búsqueda paralela.
 
-\subsection{Desempeño en FING}
+\subsection{Medición inicial en FING}
 
 La Tabla~\ref{tab:resultados-fing} muestra las medianas de cinco repeticiones
-del escenario completo de 120 meses. Todas las muestras produjeron el hash
+del escenario funcional de 120 meses. Todas las muestras produjeron el hash
 \texttt{9de3a86b1efdd900}, igual al de la versión secuencial.
 
 \begin{table}[ht]
@@ -109,7 +109,7 @@ MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Comunicación \\
 \label{fig:speedup-fing}
 \end{figure}
 
-El menor tiempo fue 20,623~s con un proceso y cuatro hilos, un speedup de
+El menor tiempo fue 20,623~s con un proceso y cuatro hilos, una mejora de
 1,386. Dos hilos, que corresponden a los dos núcleos físicos del equipo,
 alcanzaron 22,636~s. Los cuatro hilos aprovecharon además los hilos lógicos del
 procesador, pero la mejora adicional fue menor.
@@ -120,9 +120,24 @@ remotas. El desbalance medio fue solamente 1,005, por lo que la diferencia no
 se explica por una mala división del trabajo. El costo proviene principalmente
 del intercambio y de mantener datos globales en ambos procesos.
 
+Esta medición permitió comprobar el procedimiento, pero no se usa como carga
+principal. Después del mes 14 casi no quedaba trabajo de búsqueda, por lo que
+los costos fijos tenían demasiado peso.
+
+\subsection{Instancia principal de rendimiento}
+
+La instancia \texttt{hpc.conf} generó 7427104 hogares. La versión secuencial
+completó las 240 iteraciones en 13761,983~s, equivalentes a 3~h 49~min, y
+produjo el hash \texttt{6b39928d840ed346}. La campaña paralela continúa con
+las configuraciones definidas en la metodología.
+
+\pendiente{incorporar la tabla y la gráfica finales cuando termine la campaña paralela.}
+
 \subsection{Comportamiento del modelo}
 
-En la primera iteración base, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas y 194083 rechazadas por conflicto; otros 8863 hogares insatisfechos no hallaron destino viable. En el mes 14 se alcanzaron 333477 hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto hasta el mes 120, 188874 hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. Las viviendas se liberaron correctamente; el estado quedó trabado por las reglas del escenario sintético.
+En la primera iteración del escenario funcional, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas. En el mes 14 se alcanzaron 333477 hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto, 188874 hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. Las viviendas se liberaron correctamente; el estado quedó trabado por la combinación de restricciones.
+
+La instancia principal mostró una evolución más larga. En la primera iteración estaban satisfechos 4056562 hogares, un 54,6\%. En la iteración 30 el valor llegó a 78,1\% y en la 60 a 78,4\%. Al finalizar se mantuvo en 78,4\%, con 5824126 hogares satisfechos. Durante las 240 iteraciones se aceptaron 2496186 mudanzas. Este aumento de satisfacción es compatible con el mecanismo de Schelling, pero por sí solo no demuestra un aumento de la segregación espacial. Para esa afirmación sería necesario agregar una medida específica de agrupamiento.
 
 \subsection{Sensibilidad}
 
