@@ -123,3 +123,24 @@ python3 scripts/ejecutar_escenarios.py --trabajos 2 \
 ```
 
 El archivo `resumen_escenarios.csv` combina los resultados sin mezclar los directorios ni las salidas de cada simulación.
+# Análisis visual
+
+El estado inicial se puede reconstruir con la misma configuración y semilla. Al terminar una
+ejecución, el siguiente comando compara ese estado con el archivo final, calcula la proporción
+media de vecinos de la misma clase y crea las dos grillas en formato PPM:
+
+```bash
+./build/schelling_analizar --config config/hpc.conf \
+  --state results/fing/hpc/estado_final.bin --output results/fing/hpc/grilla
+```
+
+Los colores son naranja para clase alta, azul para clase media, verde para clase baja, gris claro
+para viviendas vacías y gris oscuro para celdas no residenciales. Las imágenes se convierten a PNG
+sin dependencias adicionales con:
+
+```bash
+python3 scripts/ppm_a_png.py results/fing/hpc/grilla_inicial.ppm \
+  informe/figuras/grilla_hpc_inicial.png
+python3 scripts/ppm_a_png.py results/fing/hpc/grilla_final.ppm \
+  informe/figuras/grilla_hpc_final.png
+```

@@ -6,7 +6,7 @@ RELEASE_FLAGS := -O3 -DNDEBUG
 DEBUG_FLAGS := -O0 -g3
 OPENMP_FLAGS := -fopenmp
 BUILD_DIR := build-make
-COMMON_SOURCES := src/common/aleatorio.c src/common/argumentos.c src/common/checkpoint.c src/common/configuracion.c \
+COMMON_SOURCES := src/common/aleatorio.c src/common/analisis.c src/common/argumentos.c src/common/checkpoint.c src/common/configuracion.c \
 	src/common/economia.c src/common/generador.c src/common/hash.c src/common/indice_vacantes.c src/common/modelo.c src/common/particion.c src/common/registro.c \
 	src/common/salida.c src/common/vecindario.c src/sequential/simulacion.c
 COMMON_OBJECTS := $(patsubst src/%.c,$(BUILD_DIR)/make/%.o,$(COMMON_SOURCES))
@@ -18,10 +18,14 @@ CPPFLAGS := -DSCHELLING_VERSION=\"$(VERSION)\"
 all: release
 
 release: CFLAGS += $(RELEASE_FLAGS)
-release: $(BUILD_DIR)/schelling_seq $(BUILD_DIR)/schelling_hybrid
+release: $(BUILD_DIR)/schelling_seq $(BUILD_DIR)/schelling_hybrid $(BUILD_DIR)/schelling_analizar
 
 debug: CFLAGS += $(DEBUG_FLAGS)
-debug: $(BUILD_DIR)/schelling_seq $(BUILD_DIR)/schelling_hybrid
+debug: $(BUILD_DIR)/schelling_seq $(BUILD_DIR)/schelling_hybrid $(BUILD_DIR)/schelling_analizar
+
+$(BUILD_DIR)/schelling_analizar: app/schelling_analizar.c $(COMMON_OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -lm -o $@
 
 $(BUILD_DIR)/schelling_seq: app/schelling_seq.c $(COMMON_OBJECTS)
 	@mkdir -p $(dir $@)
@@ -80,11 +84,16 @@ $(BUILD_DIR)/prueba_vecindario: tests/unit/prueba_vecindario.c $(COMMON_OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) $^ -lm -o $@
 
-test: debug $(BUILD_DIR)/prueba_configuracion $(BUILD_DIR)/prueba_checkpoint \
+$(BUILD_DIR)/prueba_analisis: tests/unit/prueba_analisis.c $(COMMON_OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUG_FLAGS) $^ -lm -o $@
+
+test: debug $(BUILD_DIR)/prueba_analisis $(BUILD_DIR)/prueba_configuracion $(BUILD_DIR)/prueba_checkpoint \
 	$(BUILD_DIR)/prueba_aleatorio \
 	$(BUILD_DIR)/prueba_economia $(BUILD_DIR)/prueba_generador $(BUILD_DIR)/prueba_indice_vacantes \
 	$(BUILD_DIR)/prueba_modelo $(BUILD_DIR)/prueba_particion \
 	$(BUILD_DIR)/prueba_hash $(BUILD_DIR)/prueba_simulacion $(BUILD_DIR)/prueba_vecindario
+	$(BUILD_DIR)/prueba_analisis
 	$(BUILD_DIR)/prueba_configuracion
 	$(BUILD_DIR)/prueba_checkpoint
 	$(BUILD_DIR)/prueba_aleatorio

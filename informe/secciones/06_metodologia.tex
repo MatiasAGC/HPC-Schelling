@@ -20,6 +20,8 @@ para utilizar la red Ethernet de las pcunix.
 
 Para medir escalabilidad fuerte se mantiene fija la instancia y se cambia la cantidad de procesos MPI e hilos OpenMP. Los checkpoints se desactivan y todas las configuraciones deben terminar con el mismo hash.
 
+Para observar el cambio espacial se reconstruye la grilla inicial con la misma semilla y se lee el estado final guardado por la simulación. Cada celda se pinta según su clase social, o como vivienda vacía o celda no residencial. Además se calcula, para cada hogar no aislado, la proporción ponderada de vecinos de su misma clase. El promedio de esas proporciones permite comparar el agrupamiento inicial y final con un único valor. Se usan el mismo radio y los mismos pesos del modelo.
+
 La validación funcional usa tres tamaños: mínimo de $8\times6$, mediano de $256\times160$ y funcional de $1024\times640$. Las primeras mediciones de rendimiento también usaron el escenario funcional. En ellas se ejecutó un calentamiento y cinco repeticiones por configuración, y se informó la mediana.
 
 Las restricciones del escenario funcional dejaron de producir solicitudes de mudanza después del mes 14. Ese caso sirve para comprobar las reglas, pero ofrece poco trabajo para estudiar paralelismo. Por ese motivo se creó la instancia \texttt{hpc.conf}, de $4096\times2560$ celdas y 240 iteraciones. Mantiene la distribución social, las preferencias y la regla económica, pero usa 20\% de viviendas vacías, permanencia cero, financiación de 60\%, plazo de 360 meses y un límite de cuota de 40\% del ingreso. Estas decisiones permiten una evolución más larga. La grilla es una carga sintética y no una estimación de la cantidad de viviendas de Montevideo.

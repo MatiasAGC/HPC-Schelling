@@ -10,6 +10,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_library(schelling_comun STATIC
+    src/common/analisis.c
     src/common/aleatorio.c
     src/common/argumentos.c
     src/common/checkpoint.c
@@ -40,6 +41,10 @@ add_executable(schelling_seq app/schelling_seq.c)
 target_link_libraries(schelling_seq PRIVATE schelling_comun)
 target_compile_options(schelling_seq PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 
+add_executable(schelling_analizar app/schelling_analizar.c)
+target_link_libraries(schelling_analizar PRIVATE schelling_comun)
+target_compile_options(schelling_analizar PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+
 find_package(MPI REQUIRED COMPONENTS C)
 find_package(OpenMP REQUIRED COMPONENTS C)
 
@@ -52,6 +57,11 @@ include(CTest)
 find_package(Python3 COMPONENTS Interpreter)
 
 if(BUILD_TESTING)
+    add_executable(prueba_analisis tests/unit/prueba_analisis.c)
+    target_link_libraries(prueba_analisis PRIVATE schelling_comun)
+    target_compile_options(prueba_analisis PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+    add_test(NAME analisis COMMAND prueba_analisis)
+
     if(Python3_Interpreter_FOUND)
         add_test(NAME ayuda_experimentos
             COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/ejecutar_experimentos.py"
