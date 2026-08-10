@@ -8,6 +8,7 @@ import platform
 import shutil
 import statistics
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -57,7 +58,16 @@ def ejecutar(comando, entorno, directorio):
     if resultado.returncode != 0:
         print(resultado.stdout, end="")
         raise subprocess.CalledProcessError(resultado.returncode, comando)
-    return leerTiempoYHash(directorio)
+    archivosEsperados = (directorio / "timings.csv", directorio / "metrics.csv")
+    for _ in range(100):
+        if all(archivo.exists() for archivo in archivosEsperados):
+            break
+        time.sleep(0.1)
+    muestra = leerTiempoYHash(directorio)
+    estadoFinal = directorio / "estado_final.bin"
+    if estadoFinal.exists():
+        estadoFinal.unlink()
+    return muestra
 
 
 def resumir(nombre, procesos, threads, muestras, tiempoBase, hashEsperado):
