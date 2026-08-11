@@ -128,18 +128,91 @@ los costos fijos tenían demasiado peso.
 
 La instancia \texttt{hpc.conf} generó 7427104 hogares. La versión secuencial
 completó las 240 iteraciones en 13761,983~s, equivalentes a 3~h 49~min, y
-produjo el hash \texttt{6b39928d840ed346}. La campaña paralela continúa con
-las configuraciones definidas en la metodología.
+produjo el hash \texttt{6b39928d840ed346}. Todas las configuraciones paralelas
+produjeron el mismo hash.
 
-\pendiente{incorporar la tabla y la gráfica de tiempos, la medida de agrupamiento y las grillas inicial y final cuando termine la campaña paralela.}
+\begin{table}[ht]
+\centering
+\caption{Escalabilidad fuerte de la instancia principal en FING}
+\label{tab:resultados-hpc}
+\begin{tabular}{rrrrrr}
+\toprule
+MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Desbalance \\
+\midrule
+-- & -- & 13761,983 & 1,000 & 1,000 & -- \\
+1 & 1 & 13889,969 & 0,991 & 0,991 & 1,000 \\
+1 & 2 & 7981,232 & 1,724 & 0,862 & 1,000 \\
+1 & 4 & 7572,458 & 1,817 & 0,454 & 1,000 \\
+2 & 1 & 8338,180 & 1,650 & 0,825 & 1,000 \\
+2 & 2 & 8263,276 & 1,665 & 0,416 & 1,000 \\
+2 & 4 & 7901,159 & 1,742 & 0,218 & 1,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=\columnwidth,
+    height=0.62\columnwidth,
+    xlabel={Recursos de cómputo},
+    ylabel={Speedup},
+    xmin=1,xmax=8,
+    ymin=0,ymax=2.2,
+    xtick={1,2,4,8},
+    grid=major,
+    legend style={font=\scriptsize,at={(0.03,0.97)},anchor=north west}
+]
+\addplot[mark=*,blue] coordinates {(1,0.991) (2,1.724) (4,1.817)};
+\addlegendentry{Un nodo}
+\addplot[mark=square*,red] coordinates {(2,1.650) (4,1.665) (8,1.742)};
+\addlegendentry{Dos nodos}
+\end{axis}
+\end{tikzpicture}
+\caption{Speedup de la instancia principal respecto a la versión secuencial.}
+\label{fig:speedup-hpc}
+\end{figure}
+
+El menor tiempo fue 7572,458~s, equivalente a 2~h 6~min, con un proceso y
+cuatro hilos. La configuración $1\times2$ demoró solo 5,4~\% más y conservó
+una eficiencia de 0,862. Con dos procesos se comunicaron 83,2~GB lógicos y se
+atendieron 20848485 solicitudes remotas. Su desbalance medio fue 1,000132, por
+lo que el reparto de trabajo fue uniforme. A pesar de usar dos máquinas,
+ninguna de esas configuraciones superó a $1\times4$.
 
 \subsection{Comportamiento del modelo}
 
 En la primera iteración del escenario funcional, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas. En el mes 14 se alcanzaron 333477 hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto, 188874 hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. Las viviendas se liberaron correctamente; el estado quedó trabado por la combinación de restricciones.
 
-La instancia principal mostró una evolución más larga. En la primera iteración estaban satisfechos 4056562 hogares, un 54,6\%. En la iteración 30 el valor llegó a 78,1\% y en la 60 a 78,4\%. Al finalizar se mantuvo en 78,4\%, con 5824126 hogares satisfechos. Durante las 240 iteraciones se aceptaron 2496186 mudanzas. Este aumento de satisfacción es compatible con el mecanismo de Schelling, pero por sí solo no demuestra un aumento de la segregación espacial. Para esa afirmación sería necesario agregar una medida específica de agrupamiento.
+La instancia principal mostró una evolución más larga. En la primera iteración estaban satisfechos 4056562 hogares, un 54,6\%. En la iteración 30 el valor llegó a 78,1\% y en la 60 a 78,4\%. Al finalizar se mantuvo en 78,4\%, con 5824126 hogares satisfechos. Durante las 240 iteraciones se aceptaron 2496186 mudanzas.
 
-La comparación final incluirá la grilla inicial y la final con una leyenda común. Las imágenes permitirán reconocer agrupamientos grandes, mientras que la proporción media de vecinos de la misma clase permitirá medir el cambio sin depender solamente de una observación visual.
+La proporción media ponderada de vecinos de la misma clase pasó de 0,437 en el estado inicial a 0,593 en el final. El aumento de 15,6 puntos porcentuales confirma que los hogares quedaron más agrupados por clase. La Fig.~\ref{fig:grillas-hpc} muestra el mismo cambio de forma visual. La grilla inicial presenta una mezcla fina, mientras que en la final aparecen grupos del mismo color más continuos.
+
+\begin{figure*}[ht]
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{grilla_hpc_inicial.png}\\[-1mm]
+\small Estado inicial
+\end{minipage}
+\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\linewidth]{grilla_hpc_final.png}\\[-1mm]
+\small Estado final
+\end{minipage}
+
+\vspace{1mm}
+\small
+\colorbox[RGB]{213,94,0}{\strut\hspace{3mm}} clase alta\quad
+\colorbox[RGB]{0,114,178}{\strut\hspace{3mm}} clase media\quad
+\colorbox[RGB]{0,158,115}{\strut\hspace{3mm}} clase baja\quad
+\colorbox[RGB]{238,238,238}{\strut\hspace{3mm}} vacía\quad
+\colorbox[RGB]{45,45,45}{\strut\hspace{3mm}} no residencial
+\caption{Ocupación de la grilla sintética antes y después de 240 iteraciones.}
+\label{fig:grillas-hpc}
+\end{figure*}
 
 \subsection{Sensibilidad}
 

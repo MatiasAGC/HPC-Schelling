@@ -1,0 +1,15 @@
+{
+  "calentamientos": 0,
+  "config": "config/hpc.conf",
+  "configuraciones": "1x1,1x2,1x4,2x1,2x2,2x4",
+  "hibrido": "build-make/schelling_hybrid",
+  "host": "pcunix42.fing.edu.uy",
+  "hostfile": "mis_hosts",
+  "iteraciones": 240,
+  "plataforma": "Linux-6.19.14-200.fc43.x86_64-x86_64-with-glibc2.42",
+  "procesador": "",
+  "python": "3.14.6",
+  "repeticiones": 1,
+  "salida": "/tmp/schelling_hpc_final",
+  "secuencial": "build-make/schelling_seq"
+}
