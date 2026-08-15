@@ -1,5 +1,5 @@
 \begin{abstract}
-Se implementó en C una simulación del modelo de segregación residencial de Schelling sobre una grilla sintética. El modelo incorpora clases socioeconómicas, preferencias de vecindad, precios y capacidad de pago. Se desarrollaron una versión secuencial y otra híbrida con MPI y OpenMP. En la evaluación principal, la configuración con un proceso y cuatro hilos redujo el tiempo de 3~h 49~min a 2~h 6~min. La proporción media de vecinos de la misma clase aumentó de 43,7\% a 59,3\%, en concordancia con el comportamiento esperado del modelo.
+En este artículo se presenta una simulación del modelo de segregación residencial de Schelling aplicada a Montevideo. Los hogares se distribuyen sobre una grilla sintética y deciden si permanecen o se mudan de acuerdo con la composición del vecindario, el precio de las viviendas y su capacidad de pago. La solución fue implementada en C mediante una versión secuencial y otra híbrida que combina MPI y OpenMP. Se evalúan el rendimiento de ambas implementaciones y los cambios producidos en la distribución de los hogares. Los resultados permiten analizar el comportamiento del modelo y el efecto del paralelismo sobre el tiempo de ejecución.
 \end{abstract}
 
 \begin{IEEEkeywords}
