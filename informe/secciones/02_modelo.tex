@@ -4,7 +4,7 @@
 
 Montevideo se representa mediante una grilla bidimensional rectangular con celdas residenciales y no residenciales, siguiendo la abstracción espacial del modelo clásico de Schelling. Una celda residencial contiene como máximo una vivienda, que puede estar ocupada o vacía. Los hogares se clasifican en siete subestratos y tres clases socioeconómicas.
 
-El escenario funcional inicial utiliza $1024\times640$ celdas. La instancia principal de rendimiento utiliza $4096\times2560$. En ambos casos las coordenadas solo indican cercanía dentro del modelo y no son ubicaciones reales de Montevideo. La grilla grande tampoco representa una cantidad real de viviendas: es una instancia sintética utilizada para repartir suficiente trabajo. La grilla se divide en ocho franjas, pero estas franjas no corresponden a los municipios reales. Los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
+La medición preliminar utiliza $1024\times640$ celdas y la instancia principal de rendimiento, $4096\times2560$. En ambos casos las coordenadas solo indican cercanía dentro del modelo y no son ubicaciones reales de Montevideo. La grilla grande tampoco representa una cantidad real de viviendas: es una instancia sintética utilizada para repartir suficiente trabajo. La grilla se divide en ocho franjas, pero estas franjas no corresponden a los municipios reales. Los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
 
 \subsection{Vecindario y ponderación}
 
@@ -43,4 +43,4 @@ La configuración base adopta $\beta_1=0{,}40$, $\beta_2=0{,}60$ y $\rho=0{,}30$
 
 La simulación es síncrona. Los hogares insatisfechos y no bloqueados solicitan destinos accesibles; los conflictos se resuelven de forma determinista antes de aplicar simultáneamente las mudanzas. Una vivienda liberada queda disponible en la iteración siguiente.
 
-En el escenario funcional, un hogar que se muda queda bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. La instancia de rendimiento usa permanencia cero para mantener solicitudes activas durante las 240 iteraciones.
+En la configuración preliminar, un hogar que se muda queda bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. La instancia principal usa permanencia cero porque con el bloqueo y una ocupación mayor la simulación dejaba de registrar mudanzas en pocas iteraciones.

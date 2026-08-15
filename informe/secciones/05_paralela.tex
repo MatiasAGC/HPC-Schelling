@@ -24,4 +24,4 @@ Las regiones OpenMP terminan antes de cada operación MPI entre todos los proces
 
 Después de cada iteración se reducen el mínimo y el máximo del hash de estado. Una diferencia detiene la ejecución, detectando divergencias entre procesos en el primer mes donde aparecen. Además, las pruebas de integración exigen el hash secuencial conocido con uno, dos y tres procesos MPI.
 
-Las configuraciones de un proceso con cuatro hilos y dos procesos con dos hilos reproducen también el hash secuencial exacto. En una medición de una iteración del escenario funcional, un proceso pasó de 3,61 segundos con un hilo a 1,85 segundos con cuatro hilos, una mejora de 1,95. La campaña grande vuelve a comprobar el hash al terminar cada configuración.
+Las configuraciones de un proceso con cuatro hilos y dos procesos con dos hilos reproducen también el resultado secuencial exacto. La instancia principal vuelve a comprobar esta igualdad al terminar cada configuración.

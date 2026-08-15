@@ -22,7 +22,7 @@ Para medir escalabilidad fuerte se mantiene fija la instancia y se cambia la can
 
 Para observar el cambio espacial se reconstruye la grilla inicial con la misma semilla y se lee el estado final guardado por la simulación. Cada celda se pinta según su clase social, o como vivienda vacía o celda no residencial. Además se calcula, para cada hogar no aislado, la proporción ponderada de vecinos de su misma clase. El promedio de esas proporciones permite comparar el agrupamiento inicial y final con un único valor. Se usan el mismo radio y los mismos pesos del modelo.
 
-La validación funcional usa tres tamaños: mínimo de $8\times6$, mediano de $256\times160$ y funcional de $1024\times640$. Las primeras mediciones de rendimiento también usaron el escenario funcional. En ellas se ejecutó un calentamiento y cinco repeticiones por configuración, y se informó la mediana.
+Las reglas se comprobaron con grillas pequeñas de resultado conocido. Para comparar cambios de parámetros se usó una grilla de $256\times160$. Antes de ejecutar la instancia principal se midió una grilla de $1024\times640$ con un calentamiento y cinco repeticiones por configuración. Esta medición también mostró que la combinación inicial de ocupación y permanencia dejaba de producir mudanzas demasiado pronto.
 
 La instancia principal \texttt{hpc.conf} tiene $4096\times2560$ celdas y 240 iteraciones. Mantiene la distribución social, las preferencias y la regla económica; usa 20\% de viviendas vacías, permanencia cero, financiación de 60\%, plazo de 360 meses y un límite de cuota de 40\% del ingreso. La grilla es una carga sintética y no una estimación de la cantidad de viviendas de Montevideo.
 

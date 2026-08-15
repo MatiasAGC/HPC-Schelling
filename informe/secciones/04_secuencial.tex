@@ -26,13 +26,13 @@ El generador pseudoaleatorio no mantiene estado mutable. Una mezcla SplitMix64 r
 
 El checkpoint binario guarda firma, versión, próxima iteración, dimensiones, cantidad de hogares y códigos de verificación de la configuración y del estado. También guarda cada campo de las celdas y los hogares. Se escribe primero un archivo temporal y se renombra al finalizar. Al cargarlo se revisan su versión, longitud, reglas de consistencia y códigos de verificación. La cantidad total de iteraciones puede aumentarse al continuar una ejecución.
 
-En el escenario funcional se genera un checkpoint cada 50 iteraciones y se conservan los dos últimos completos. Cada estado se escribe primero en un archivo temporal y se renombra solamente cuando está completo. En las mediciones de rendimiento los checkpoints se desactivan para que la escritura en disco no altere los tiempos.
+Cuando se habilitan checkpoints, cada estado se escribe primero en un archivo temporal y se renombra solamente cuando está completo. En las mediciones de rendimiento se desactivan para que la escritura en disco no altere los tiempos.
 
 \subsection{Optimizaciones}
 
 Los pesos gaussianos y desplazamientos se calculan una sola vez al iniciar. En cada iteración se revisa una vez si cada vivienda vacía sirve para cada una de las tres clases. Con esos resultados y los siete ingresos base se construye un índice por nivel social que descarta los destinos que no cumplen las reglas sociales o económicas. Si un índice queda vacío, la búsqueda responde de inmediato que no existe un destino. Esto evita recorrer todos los bloques para miles de hogares cuando ninguna vivienda es posible.
 
-La terminación por distancia usa una cota conservadora respecto al exterior de los anillos ya visitados. Así no altera la elección de destino ni sus desempates. El escenario mínimo produjo los mismos hashes que la referencia exhaustiva: \texttt{dceac07696c2ac27} y \texttt{7d65e8c90d52123b}. Como comprobación de viabilidad, una iteración Release del escenario base de $1024\times640$, con 522351 hogares, demoró 3,98 segundos en el equipo local. Esta medición es diagnóstica; los tiempos reportados como resultados se obtendrán mediante el protocolo experimental definitivo.
+La terminación por distancia usa una cota conservadora respecto al exterior de los anillos ya visitados. Así no altera la elección de destino ni sus desempates. Los casos pequeños produjeron el mismo resultado que una búsqueda exhaustiva.
 
 \subsection{Convenciones y simplificaciones}
 

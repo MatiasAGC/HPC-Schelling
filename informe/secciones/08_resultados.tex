@@ -58,10 +58,10 @@ Con dos procesos el desbalance medio de trabajo fue 1,002, consistente con la di
 
 Una pasada adicional de los 120 meses mostró un comportamiento diferente. La versión secuencial demoró entre 32 y 36~s. La configuración $2\times4$ demoró entre 19,8 y 26,0~s; su mejor speedup observado fue 1,63. Esta comparación tiene una sola muestra por configuración y se usa para estimar la duración, no como resultado final. La menor mejora se explica porque, una vez que dejan de existir destinos válidos, las fases comunes y la comunicación tienen mayor peso que la búsqueda paralela.
 
-\subsection{Medición inicial en FING}
+\subsection{Medición preliminar en FING}
 
 La Tabla~\ref{tab:resultados-fing} muestra las medianas de cinco repeticiones
-del escenario funcional de 120 meses. Todas las muestras produjeron el hash
+de la grilla de $1024\times640$ durante 120 iteraciones. Todas las muestras produjeron el hash
 \texttt{9de3a86b1efdd900}, igual al de la versión secuencial.
 
 \begin{table}[ht]
@@ -183,7 +183,7 @@ ninguna de esas configuraciones superó a $1\times4$.
 
 \subsection{Comportamiento del modelo}
 
-En la primera iteración del escenario funcional, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas. En el mes 14 se alcanzaron 333477 hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto, 188874 hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. Las viviendas se liberaron correctamente; el estado quedó trabado por la combinación de restricciones.
+En la primera iteración de la medición preliminar, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas. En el mes 14 se alcanzaron 333477 hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto, 188874 hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. Las viviendas se liberaron correctamente; el estado quedó trabado por la combinación de restricciones.
 
 La instancia principal mostró una evolución más larga. En la primera iteración estaban satisfechos 4056562 hogares, un 54,6\%. En la iteración 30 el valor llegó a 78,1\% y en la 60 a 78,4\%. Al finalizar se mantuvo en 78,4\%, con 5824126 hogares satisfechos. Durante las 240 iteraciones se aceptaron 2496186 mudanzas.
 

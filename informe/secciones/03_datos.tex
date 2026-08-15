@@ -1,23 +1,36 @@
-\section{Datos, preparación e hipótesis}
+\section{Datos y generación de instancias}
 
-La distribución socioeconómica se basa en los subestratos del INSE y la cantidad de viviendas y hogares se aproxima a partir del Censo 2023 \cite{inse2023,censo2023}.
+Para definir la composición socioeconómica se utilizó el informe INSE 2023, elaborado a partir de la Encuesta Continua de Hogares 2022 \cite{inse2023}. El informe divide los hogares de Montevideo en siete niveles, desde A+ hasta B$-$. En la simulación se agrupan en tres clases: alta, media y baja.
 
-Para Montevideo, la Tabla D3 del INSE 2023 informa las proporciones de hogares B$-$ 5,0\%, B+ 10,4\%, M$-$ 16,0\%, M 21,8\%, M+ 21,2\%, A$-$ 17,1\% y A+ 8,6\%. Estas cifras sustituyen en el escenario base a la distribución preliminar no específica de Montevideo. Los ingresos de referencia continúan siendo los promedios per cápita por subestrato con valor locativo estimados sobre la ECH 2022.
+La Tabla~\ref{tab:datos-inse} muestra las proporciones publicadas para Montevideo y los ingresos mensuales tomados como referencia. Los ingresos están expresados en miles de pesos de 2022 y se usan para decidir qué viviendas puede pagar cada hogar; no representan el ingreso exacto de una familia particular.
 
-\subsection{Fuentes y transformaciones}
+\begin{table}[ht]
+\centering
+\caption{Datos socioeconómicos utilizados para Montevideo.}
+\label{tab:datos-inse}
+\begin{tabular}{l l r r}
+\toprule
+Nivel & Clase & Hogares (\%) & Ingreso \\
+\midrule
+A+    & Alta  & 8,6  & 122,5 \\
+A$-$  & Alta  & 17,1 & 71,0  \\
+M+    & Media & 21,2 & 46,7  \\
+M     & Media & 21,8 & 33,2  \\
+M$-$  & Media & 16,0 & 23,7  \\
+B+    & Baja  & 10,4 & 16,1  \\
+B$-$  & Baja  & 5,0  & 9,9   \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-El catálogo de microdatos del INE identifica el estudio como \texttt{URY-INE-CPHV-2023}, con fecha de referencia 31 de mayo de 2023 y unidad geográfica mínima de segmento censal \cite{censo2023ponderado}. La edición de mayo de 2026 incorporó ponderadores para corregir una omisión censal estimada en 10,3\%; en julio de 2026 el INE publicó una revisión posterior del mismo estudio. El catálogo enumera los archivos \texttt{personas\_ext\_05\_2026\_extraccion} y \texttt{viviendas\_ext\_05\_2026\_extraccion}.
+\subsection{Generación de la grilla}
 
-El programa no descarga ni procesa esos registros individuales. Por eso no se incluyen archivos censales ni sus códigos de verificación dentro del proyecto. Se guarda solamente la referencia al catálogo oficial. Sus condiciones permiten el uso científico o estadístico y la publicación de resultados agrupados, pero prohíben intentar identificar personas o redistribuir los datos sin permiso. El programa usa cifras generales publicadas y parámetros escritos en la configuración para crear datos sintéticos que puedan repetirse.
+El Censo 2023 se tomó como referencia para la relación entre viviendas ocupadas y vacías en Montevideo \cite{censo2023}. A partir de esos valores se usó inicialmente una ocupación cercana al 90\%. Con esa proporción y una permanencia mínima después de cada mudanza, las ejecuciones preliminares dejaron de producir movimientos en pocas iteraciones porque los hogares encontraban pocas viviendas disponibles que cumplieran todas las condiciones.
 
-\subsection{Generación de instancias}
+La instancia principal mantiene un 88,5\% de celdas residenciales y ocupa el 80\% de esas viviendas. El resto queda disponible para las mudanzas. También se elimina la permanencia mínima, por lo que un hogar insatisfecho puede volver a buscar vivienda en la iteración siguiente. Estos cambios permiten observar la evolución del modelo durante más tiempo sin modificar las reglas de satisfacción ni la restricción económica.
 
-Además del escenario de Montevideo se utilizan casos sintéticos pequeños y medianos para revisar las reglas del modelo. Toda generación registra la semilla y los valores usados.
+La grilla se genera a partir de una semilla. Primero se decide qué celdas son residenciales y cuáles están ocupadas. Luego se crean los hogares y se asignan los niveles sociales con las proporciones de la Tabla~\ref{tab:datos-inse}. Usar la misma semilla y la misma configuración produce siempre el mismo estado inicial. Cada mudanza ocupa una vivienda y libera otra, por lo que la cantidad de viviendas vacías se mantiene.
 
-El generador recorre dos veces la grilla. En la primera pasada determina de forma reproducible cuáles celdas son residenciales y cuáles están ocupadas. Así obtiene la cantidad exacta de hogares antes de reservar memoria. En la segunda pasada construye las celdas y los hogares, asigna zonas mediante franjas verticales y selecciona los grupos sociales con los pesos configurados. El escenario funcional usa proporción residencial 0,885 y ocupación 0,90. La instancia de rendimiento conserva la proporción residencial y reduce la ocupación a 0,80, por lo que mantiene 20\% de viviendas vacías. Cada mudanza ocupa una vivienda y libera otra, de modo que la cantidad de vacantes se conserva. Los conteos efectivos dependen de la semilla y se informan al iniciar cada ejecución.
+\subsection{Límites de la representación}
 
-\subsection{Supuestos y limitaciones de los datos}
-
-No se completan datos censales faltantes ni se agrupan registros por municipio. Los siete niveles socioeconómicos se sortean según las proporciones publicadas para Montevideo y las zonas se representan mediante franjas verticales. Estas zonas son parte del modelo y no corresponden a municipios reales. Las preferencias, los precios y las reglas económicas que no tienen un valor oficial se indican como supuestos. Usar registros censales, mapas reales y una relación entre segmentos censales y municipios queda como una posible ampliación.
-
-El escenario base no utiliza un mapa real. Por ese motivo, las posiciones y distancias de la simulación no representan posiciones ni distancias reales. Incorporar la cartografía censal queda como una posible ampliación.
+La grilla no es un mapa de Montevideo. Sus coordenadas solo representan cercanía dentro de la simulación y las ocho zonas son franjas, no municipios reales. Los datos del INSE determinan cuántos hogares pertenecen a cada nivel, pero no dónde se ubican. Los precios, las preferencias entre clases y las condiciones de financiación son parámetros del modelo. Por estas razones, los resultados sirven para estudiar el funcionamiento y el rendimiento de la simulación, pero no para describir la segregación real de la ciudad.
