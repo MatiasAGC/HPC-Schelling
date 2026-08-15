@@ -39,7 +39,32 @@ def bloque(tipo, datos):
     )
 
 
-def convertir(origen, destino):
+def recortar(datos, ancho, alto, recorte):
+    if recorte is None:
+        return datos, ancho, alto
+
+    origen_x, origen_y, nuevo_ancho, nuevo_alto = recorte
+
+    if (
+        origen_x < 0
+        or origen_y < 0
+        or nuevo_ancho <= 0
+        or nuevo_alto <= 0
+        or origen_x + nuevo_ancho > ancho
+        or origen_y + nuevo_alto > alto
+    ):
+        raise ValueError("el recorte queda fuera de la imagen")
+
+    filas = []
+
+    for fila in range(origen_y, origen_y + nuevo_alto):
+        inicio = (fila * ancho + origen_x) * 3
+        filas.append(datos[inicio : inicio + nuevo_ancho * 3])
+
+    return b"".join(filas), nuevo_ancho, nuevo_alto
+
+
+def convertir(origen, destino, recorte=None):
     with origen.open("rb") as archivo:
         if leer_token(archivo) != b"P6":
             raise ValueError("la imagen no usa el formato ppm binario")
@@ -54,6 +79,8 @@ def convertir(origen, destino):
 
     if len(datos) != ancho * alto * 3:
         raise ValueError("cantidad de pixeles incorrecta")
+
+    datos, ancho, alto = recortar(datos, ancho, alto, recorte)
 
     filas = b"".join(
         b"\0" + datos[fila * ancho * 3 : (fila + 1) * ancho * 3]
@@ -71,8 +98,15 @@ def main():
     parser = argparse.ArgumentParser(description="convierte una grilla ppm a png")
     parser.add_argument("origen", type=Path)
     parser.add_argument("destino", type=Path)
+    parser.add_argument(
+        "--crop",
+        nargs=4,
+        type=int,
+        metavar=("X", "Y", "ANCHO", "ALTO"),
+        help="recorta la imagen antes de convertirla",
+    )
     argumentos = parser.parse_args()
-    convertir(argumentos.origen, argumentos.destino)
+    convertir(argumentos.origen, argumentos.destino, argumentos.crop)
 
 
 if __name__ == "__main__":

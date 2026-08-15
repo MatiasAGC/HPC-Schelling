@@ -1,17 +1,9 @@
 \section{Introducción}
 
-La segregación residencial puede aparecer a partir de muchas decisiones individuales sobre dónde vivir. El modelo de Schelling muestra que incluso preferencias moderadas pueden producir zonas muy separadas a nivel general \cite{schelling1971}.
+El modelo de Schelling estudia cómo las preferencias individuales sobre el vecindario pueden modificar la distribución espacial de una población. Su resultado central es que decisiones locales moderadas pueden formar agrupamientos marcados a nivel global \cite{schelling1971}.
 
-Este proyecto adapta el modelo a una representación simplificada de Montevideo e incorpora factores sociales y económicos. Su escala y la necesidad de evaluar múltiples escenarios motivan el uso de computación de alto desempeño.
+En este trabajo los hogares se ubican en una grilla rectangular y se clasifican en tres clases socioeconómicas. Cada hogar evalúa la composición de su vecindario y, cuando no está satisfecho, busca una vivienda vacía que cumpla sus preferencias y su capacidad de pago. Las proporciones sociales se basan en datos agregados de Montevideo, mientras que las ubicaciones se generan de forma sintética.
 
-\subsection{Objetivos y contribuciones}
+La evaluación de vecindarios y la búsqueda de viviendas se repiten para millones de hogares. Para reducir ese costo se implementaron una versión secuencial y una versión híbrida que combina MPI para distribuir franjas de la grilla y OpenMP para repartir el trabajo dentro de cada proceso. Ambas versiones aplican las mismas reglas y producen el mismo resultado para una semilla dada.
 
-El proyecto aporta una definición precisa del modelo, una versión secuencial de referencia y una versión paralela con MPI y OpenMP. También permite guardar y retomar una simulación, repetir experimentos con los mismos datos y ejecutar varios escenarios de forma controlada. Se compara que las dos versiones den el mismo resultado y se mide su tiempo de ejecución. Las pruebas entre varias máquinas se realizan en FING.
-
-\subsection{Motivación computacional}
-
-La evaluación repetida de vecindarios y destinos tiene un costo suficiente para estudiar memoria compartida y distribuida. El escenario inicial de $1024\times640$ permitió validar el modelo, pero varias restricciones juntas redujeron las mudanzas después de pocas iteraciones. Para la evaluación de rendimiento se agregó una instancia sintética de $4096\times2560$. Esta instancia conserva las proporciones sociales, pero aumenta el trabajo disponible para repartir entre procesos e hilos. El proyecto también permite ejecutar escenarios independientes de forma concurrente.
-
-\subsection{Organización del documento}
-
-Las secciones siguientes describen el modelo y los datos, las implementaciones, la metodología de evaluación, los resultados y las conclusiones.
+El artículo describe el modelo, la generación de las instancias, las implementaciones secuencial y paralela, y la evaluación realizada en equipos de FING. Finalmente se analizan el rendimiento y el cambio espacial producido por la simulación.

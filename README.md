@@ -2,18 +2,15 @@
 
 Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segregación residencial basado en Schelling y parametrizado con datos agregados de Montevideo.
 
-## Estado
+## Contenido
 
-La especificación funcional está cerrada y están implementados los hitos 1 a 7: simulación secuencial, reproducibilidad, persistencia, índice espacial, distribución MPI, paralelismo OpenMP, automatización experimental y ejecución concurrente de escenarios. También se completaron las mediciones secuenciales e híbridas en dos máquinas de FING.
+El repositorio incluye:
 
-Los documentos principales son:
-
-- `Instrucciones/ESPECIFICACION.md`: requisitos, decisiones del modelo, arquitectura, pruebas y plan incremental.
-- `Instrucciones/ESTILO_C.md`: convenciones de escritura y organización del código C.
-- `informe/main.tex`: informe vivo en formato IEEE.
-- `informe/REQUISITOS.md`: correspondencia entre el punteo de entrega y las secciones del informe.
-
-Los PDF del curso, el informe inicial y otros materiales de referencia dentro de `Instrucciones/` se mantienen localmente y están ignorados por Git.
+- `app`, `src` e `include`: implementación en C;
+- `config`: escenarios de simulación;
+- `scripts`: ejecución de campañas y generación de imágenes;
+- `tests`: pruebas funcionales;
+- `informe`: artículo y datos experimentales utilizados.
 
 ## Compilar el informe
 
@@ -52,17 +49,28 @@ ctest --test-dir build --output-on-failure -E '^mpi_'
 
 ## Ejecución
 
-`config/base.conf` conserva el escenario funcional con las restricciones
-originales. `config/hpc.conf` es la instancia sintética de mayor resolución
-utilizada para evaluar rendimiento; mantiene las proporciones sociales, pero su
-cantidad de celdas no representa la población real de Montevideo.
+Las configuraciones incluidas son:
+
+| Archivo | Uso |
+|---|---|
+| `base.conf` | escenario funcional de `1024×640` y 120 iteraciones |
+| `hpc.conf` | instancia principal de rendimiento de `4096×2560` y 240 iteraciones |
+| `mediana.conf` | escenario corto de `256×160` para sensibilidad |
+| `mediana_sin_ruido.conf` | escenario mediano sin variación aleatoria de precios |
+| `mediana_sin_permanencia.conf` | escenario mediano sin bloqueo posterior a una mudanza |
+
+Cada archivo contiene todos los parámetros necesarios. Las primeras líneas
+definen tamaño, iteraciones, vecindario y semilla. Luego aparecen los parámetros
+económicos, la proporción de viviendas, la distribución de subestratos y las
+tolerancias de las tres clases. `hpc.conf` es una carga sintética y su cantidad
+de celdas no representa la población real de Montevideo.
 
 ```bash
 ./build/schelling_seq --config config/base.conf --validate
 OMP_NUM_THREADS=2 mpirun -np 2 ./build/schelling_hybrid --config config/base.conf --validate
 ```
 
-El ejecutable secuencial genera el estado inicial y ejecuta la cantidad configurada de iteraciones. El ejecutable híbrido reparte satisfacción, actualización de precios y búsquedas entre procesos MPI y threads OpenMP; consolida solicitudes globalmente e intercambia halos entre franjas vecinas. Para ejecuciones locales se recomienda fijar afinidad:
+El ejecutable secuencial genera el estado inicial y ejecuta la cantidad configurada de iteraciones. El ejecutable híbrido reparte satisfacción, actualización de precios y búsquedas entre procesos MPI e hilos OpenMP; consolida solicitudes globalmente e intercambia halos entre franjas vecinas. Para ejecuciones locales se recomienda fijar afinidad:
 
 ```bash
 OMP_NUM_THREADS=4 OMP_PROC_BIND=close OMP_PLACES=cores \
@@ -87,7 +95,7 @@ cmake --build build-sanitize --parallel
 ASAN_OPTIONS=detect_leaks=0 ctest --test-dir build-sanitize --output-on-failure -E '^mpi_'
 ```
 
-El código usa C11, advertencias estrictas de GCC, `clang-format`, `cppcheck`, AddressSanitizer, UndefinedBehaviorSanitizer y Valgrind durante el desarrollo.
+El código usa C11 y se compila con advertencias estrictas de GCC.
 
 ## Experimentos locales
 

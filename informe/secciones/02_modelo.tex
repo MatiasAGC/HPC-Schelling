@@ -17,7 +17,7 @@ La influencia disminuye con la distancia mediante una función gaussiana,
 w(c,c')=\exp\left(-\frac{d(c,c')^2}{2\sigma^2}\right).
 \end{equation}
 
-Los escenarios usan distancia de Chebyshev con $r=2$, por lo que consideran un cuadrado de hasta 24 vecinos. El peso se calcula con distancia euclidiana y $\sigma=1{,}0$, de modo que los vecinos más lejanos influyen menos. Una variante más cercana al modelo clásico, con radio 1 y pesos uniformes, queda como trabajo futuro.
+Los escenarios usan distancia de Chebyshev con $r=2$, por lo que consideran un cuadrado de hasta 24 vecinos. El peso se calcula con distancia euclidiana y $\sigma=1{,}0$, de modo que los vecinos más lejanos influyen menos.
 
 \subsection{Satisfacción y tolerancias}
 
@@ -43,4 +43,4 @@ La configuración base adopta $\beta_1=0{,}40$, $\beta_2=0{,}60$ y $\rho=0{,}30$
 
 La simulación es síncrona. Los hogares insatisfechos y no bloqueados solicitan destinos accesibles; los conflictos se resuelven de forma determinista antes de aplicar simultáneamente las mudanzas. Una vivienda liberada queda disponible en la iteración siguiente.
 
-En el escenario funcional, un hogar que se muda queda bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. La instancia de rendimiento usa permanencia cero porque las pruebas iniciales mostraron que combinar este bloqueo con las demás restricciones dejaba al sistema sin destinos rápidamente.
+En el escenario funcional, un hogar que se muda queda bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. La instancia de rendimiento usa permanencia cero para mantener solicitudes activas durante las 240 iteraciones.

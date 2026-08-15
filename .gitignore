@@ -1,9 +1,6 @@
 # Material de referencia local del proyecto (PDF del informe y del curso).
 /Instrucciones/*
-
-# La especificación del proyecto sí forma parte del repositorio.
-!/Instrucciones/ESPECIFICACION.md
-!/Instrucciones/ESTILO_C.md
+/informe/REQUISITOS.md
 
 # Metadatos de archivos descargados desde Windows/WSL.
 *:Zone.Identifier

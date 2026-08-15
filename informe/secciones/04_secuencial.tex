@@ -37,7 +37,3 @@ La terminación por distancia usa una cota conservadora respecto al exterior de 
 \subsection{Convenciones y simplificaciones}
 
 La grilla rectangular es una abstracción y no un mapa de Montevideo. Cada celda residencial representa una vivienda del simulador, sin superficie física asociada. Las proporciones sociales oficiales se aplican al conjunto de hogares. Las franjas de la grilla son sintéticas y no contienen datos oficiales por zona. Los índices comienzan en cero, las celdas se ordenan por filas y todo desplazamiento exterior se descarta.
-
-\subsection{Dificultades de implementación}
-
-La primera versión del índice espacial seguía recorriendo todas las vacantes cuando un hogar no tenía destinos viables, por lo que el caso base superaba un minuto aun para una sola iteración. El perfil algorítmico mostró que agrupar espacialmente no bastaba si los bloques retenían candidatos imposibles. La solución fue precalcular satisfacción y accesibilidad y construir índices separados por subestrato. Se mantuvo una reevaluación local para el caso en que quitar al hogar de su origen cambia el vecindario del destino.

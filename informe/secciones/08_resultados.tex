@@ -34,7 +34,7 @@ MPI & OMP & $T$ (s) & $S_p$ & $E_p$ \\
     ymin=0,ymax=4,
     xtick={1,2,4,8},
     grid=major,
-    legend style={font=\scriptsize,at={(0.03,0.97)},anchor=north west}
+    legend style={font=\scriptsize,at={(0.97,0.03)},anchor=south east}
 ]
 \addplot[dashed,gray] coordinates {(1,1) (2,2) (4,4)};
 \addlegendentry{Ideal}
@@ -120,9 +120,9 @@ remotas. El desbalance medio fue solamente 1,005, por lo que la diferencia no
 se explica por una mala división del trabajo. El costo proviene principalmente
 del intercambio y de mantener datos globales en ambos procesos.
 
-Esta medición permitió comprobar el procedimiento, pero no se usa como carga
-principal. Después del mes 14 casi no quedaba trabajo de búsqueda, por lo que
-los costos fijos tenían demasiado peso.
+Después del mes 14 casi no quedaba trabajo de búsqueda en esta instancia, por
+lo que los costos fijos tenían demasiado peso. La instancia principal mantiene
+solicitudes activas durante más iteraciones.
 
 \subsection{Instancia principal de rendimiento}
 
@@ -162,7 +162,7 @@ MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Desbalance \\
     ymin=0,ymax=2.2,
     xtick={1,2,4,8},
     grid=major,
-    legend style={font=\scriptsize,at={(0.03,0.97)},anchor=north west}
+    legend style={font=\scriptsize,at={(0.97,0.03)},anchor=south east}
 ]
 \addplot[mark=*,blue] coordinates {(1,0.991) (2,1.724) (4,1.817)};
 \addlegendentry{Un nodo}
@@ -191,16 +191,29 @@ La proporción media ponderada de vecinos de la misma clase pasó de 0,437 en el
 
 \begin{figure*}[ht]
 \centering
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.48\textwidth}
 \centering
 \includegraphics[width=\linewidth]{grilla_hpc_inicial.png}\\[-1mm]
-\small Estado inicial
+\small Vista general inicial
 \end{minipage}
 \hfill
-\begin{minipage}{0.49\textwidth}
+\begin{minipage}{0.48\textwidth}
 \centering
 \includegraphics[width=\linewidth]{grilla_hpc_final.png}\\[-1mm]
-\small Estado final
+\small Vista general final
+\end{minipage}
+
+\vspace{2mm}
+\begin{minipage}{0.31\textwidth}
+\centering
+\includegraphics[width=\linewidth]{grilla_hpc_inicial_zoom.png}\\[-1mm]
+\small Recorte central inicial
+\end{minipage}
+\hspace{8mm}
+\begin{minipage}{0.31\textwidth}
+\centering
+\includegraphics[width=\linewidth]{grilla_hpc_final_zoom.png}\\[-1mm]
+\small Recorte central final
 \end{minipage}
 
 \vspace{1mm}
@@ -210,7 +223,7 @@ La proporción media ponderada de vecinos de la misma clase pasó de 0,437 en el
 \colorbox[RGB]{0,158,115}{\strut\hspace{3mm}} clase baja\quad
 \colorbox[RGB]{238,238,238}{\strut\hspace{3mm}} vacía\quad
 \colorbox[RGB]{45,45,45}{\strut\hspace{3mm}} no residencial
-\caption{Ocupación de la grilla sintética antes y después de 240 iteraciones.}
+\caption{Ocupación de la grilla sintética antes y después de 240 iteraciones. Los recortes muestran las mismas $512\times512$ celdas centrales.}
 \label{fig:grillas-hpc}
 \end{figure*}
 
