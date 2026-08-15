@@ -2,7 +2,7 @@
 
 \subsection{Desempeño local}
 
-La Tabla~\ref{tab:resultados-locales} resume cinco repeticiones medidas después de un calentamiento. Todas produjeron el hash \texttt{4eac656015050f40}.
+La Tabla~\ref{tab:resultados-locales} resume cinco repeticiones de una iteración sobre la grilla de $1024\times640$. Antes se realizó una ejecución que no se incluyó en los tiempos. Todas las configuraciones terminaron con el mismo estado.
 
 \begin{table}[ht]
 \centering
@@ -52,21 +52,20 @@ La mediana secuencial fue 3,672~s. La muestra máxima alcanzó 5,979~s, mientras
 
 \subsubsection{Versión híbrida}
 
-El costo del ejecutable híbrido con un recurso fue 0,9~\% mayor que el secuencial. Dos hilos alcanzaron una mejora de 1,964, pero cuatro hilos dentro de un solo proceso no mejoraron ese valor. La configuración $2\times4$ obtuvo el menor tiempo, 1,091~s, y una mejora de 3,366. En ella la búsqueda consumió 0,906~s, la preparación 0,057~s, los índices 0,086~s, la comunicación 0,041~s y la consolidación 0,019~s.
+La versión híbrida con un proceso y un hilo demoró 0,9~\% más que la secuencial. Dos hilos alcanzaron una mejora de 1,964, pero cuatro hilos dentro de un solo proceso no mejoraron ese valor. La configuración $2\times4$ obtuvo el menor tiempo, 1,091~s, y una mejora de 3,366. En ella la búsqueda consumió 0,906~s; preparar la iteración, 0,057~s; construir las listas de destinos, 0,086~s; comunicar los resultados, 0,041~s; y aplicar las mudanzas, 0,019~s.
 
-Con dos procesos el desbalance medio de trabajo fue 1,002, consistente con la distribución sintética casi uniforme. Se contabilizaron 4373 solicitudes remotas y 23,2~MB lógicos comunicados durante la iteración.
+Con dos procesos el desbalance medio de trabajo fue 1,002, muy cercano al reparto perfecto representado por 1. Se contabilizaron 4373 solicitudes remotas y se estimó un intercambio de 23,2~MB durante la iteración.
 
-Una pasada adicional de los 120 meses mostró un comportamiento diferente. La versión secuencial demoró entre 32 y 36~s. La configuración $2\times4$ demoró entre 19,8 y 26,0~s; su mejor speedup observado fue 1,63. Esta comparación tiene una sola muestra por configuración y se usa para estimar la duración, no como resultado final. La menor mejora se explica porque, una vez que dejan de existir destinos válidos, las fases comunes y la comunicación tienen mayor peso que la búsqueda paralela.
+Una medición adicional de las 120 iteraciones mostró un comportamiento diferente. La versión secuencial demoró entre 32 y 36~s. La configuración $2\times4$ demoró entre 19,8 y 26,0~s; su mejor speedup observado fue 1,63. Como se obtuvo una sola medida por configuración, estos valores se usaron solamente para estimar la duración. La mejora fue menor porque, cuando dejaron de existir destinos válidos, la comunicación y las tareas que no se reparten tuvieron más peso que la búsqueda paralela.
 
 \subsection{Medición preliminar en FING}
 
 La Tabla~\ref{tab:resultados-fing} muestra las medianas de cinco repeticiones
-de la grilla de $1024\times640$ durante 120 iteraciones. Todas las muestras produjeron el hash
-\texttt{9de3a86b1efdd900}, igual al de la versión secuencial.
+de la grilla de $1024\times640$ durante 120 iteraciones. Todas las configuraciones terminaron con el mismo estado que la versión secuencial.
 
 \begin{table}[ht]
 \centering
-\caption{Escalabilidad fuerte en FING para 120 meses}
+\caption{Escalabilidad fuerte en FING para 120 iteraciones}
 \label{tab:resultados-fing}
 \begin{tabular}{rrrrrr}
 \toprule
@@ -115,25 +114,24 @@ alcanzaron 22,636~s. Los cuatro hilos aprovecharon además los hilos lógicos de
 procesador, pero la mejora adicional fue menor.
 
 Las configuraciones de dos procesos fueron más lentas que la secuencial. En
-los 120 meses intercambiaron 2,79~GB lógicos y atendieron 195391 solicitudes
+las 120 iteraciones intercambiaron aproximadamente 2,79~GB y atendieron $195\,391$ solicitudes
 remotas. El desbalance medio fue solamente 1,005, por lo que la diferencia no
 se explica por una mala división del trabajo. El costo proviene principalmente
 del intercambio y de mantener datos globales en ambos procesos.
 
-Después del mes 14 casi no quedaba trabajo de búsqueda en esta instancia, por
-lo que los costos fijos tenían demasiado peso. La instancia principal mantiene
+Después de la iteración 14 casi no quedaba trabajo de búsqueda en esta grilla, por
+lo que los costos fijos tenían demasiado peso. La grilla principal mantiene
 solicitudes activas durante más iteraciones.
 
-\subsection{Instancia principal de rendimiento}
+\subsection{Evaluación con la grilla grande}
 
-La instancia \texttt{hpc.conf} generó 7427104 hogares. La versión secuencial
+La configuración \texttt{hpc.conf} generó $7\,427\,104$ hogares. La versión secuencial
 completó las 240 iteraciones en 13761,983~s, equivalentes a 3~h 49~min, y
-produjo el hash \texttt{6b39928d840ed346}. Todas las configuraciones paralelas
-produjeron el mismo hash.
+todas las configuraciones paralelas terminaron con el mismo estado.
 
 \begin{table}[ht]
 \centering
-\caption{Escalabilidad fuerte de la instancia principal en FING}
+\caption{Escalabilidad fuerte de la grilla principal en FING}
 \label{tab:resultados-hpc}
 \begin{tabular}{rrrrrr}
 \toprule
@@ -170,22 +168,22 @@ MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Desbalance \\
 \addlegendentry{Dos nodos}
 \end{axis}
 \end{tikzpicture}
-\caption{Speedup de la instancia principal respecto a la versión secuencial.}
+\caption{Speedup de la grilla principal respecto a la versión secuencial.}
 \label{fig:speedup-hpc}
 \end{figure}
 
 El menor tiempo fue 7572,458~s, equivalente a 2~h 6~min, con un proceso y
 cuatro hilos. La configuración $1\times2$ demoró solo 5,4~\% más y conservó
-una eficiencia de 0,862. Con dos procesos se comunicaron 83,2~GB lógicos y se
-atendieron 20848485 solicitudes remotas. Su desbalance medio fue 1,000132, por
+una eficiencia de 0,862. Con dos procesos se intercambiaron aproximadamente 83,2~GB y se
+atendieron $20\,848\,485$ solicitudes remotas. Su desbalance medio fue 1,000132, por
 lo que el reparto de trabajo fue uniforme. A pesar de usar dos máquinas,
 ninguna de esas configuraciones superó a $1\times4$.
 
 \subsection{Comportamiento del modelo}
 
-En la primera iteración de la medición preliminar, 291147 de 522351 hogares estaban satisfechos (55,7~\%). Se generaron 222341 solicitudes, de las cuales 28258 fueron aceptadas. En el mes 14 se alcanzaron 333477 hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto, 188874 hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. Las viviendas se liberaron correctamente; el estado quedó trabado por la combinación de restricciones.
+En la primera iteración de la medición preliminar, $291\,147$ de $522\,351$ hogares estaban satisfechos (55,7~\%). Se generaron $222\,341$ solicitudes, de las cuales $28\,258$ fueron aceptadas. En la iteración 14 se alcanzaron $333\,477$ hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto, $188\,874$ hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. La cantidad de viviendas vacías se mantuvo; la simulación se estabilizó por la combinación de restricciones.
 
-La instancia principal mostró una evolución más larga. En la primera iteración estaban satisfechos 4056562 hogares, un 54,6\%. En la iteración 30 el valor llegó a 78,1\% y en la 60 a 78,4\%. Al finalizar se mantuvo en 78,4\%, con 5824126 hogares satisfechos. Durante las 240 iteraciones se aceptaron 2496186 mudanzas.
+La grilla principal mostró una evolución más larga. En la primera iteración estaban satisfechos $4\,056\,562$ hogares, un 54,6\%. En la iteración 30 el valor llegó a 78,1\% y en la 60 a 78,4\%. Al finalizar se mantuvo en 78,4\%, con $5\,824\,126$ hogares satisfechos. Durante las 240 iteraciones se aceptaron $2\,496\,186$ mudanzas.
 
 La proporción media ponderada de vecinos de la misma clase pasó de 0,437 en el estado inicial a 0,593 en el final. El aumento de 15,6 puntos porcentuales confirma que los hogares quedaron más agrupados por clase. La Fig.~\ref{fig:grillas-hpc} muestra el mismo cambio de forma visual. La grilla inicial presenta una mezcla fina, mientras que en la final aparecen grupos del mismo color más continuos.
 
@@ -227,6 +225,6 @@ La proporción media ponderada de vecinos de la misma clase pasó de 0,437 en el
 \label{fig:grillas-hpc}
 \end{figure*}
 
-\subsection{Sensibilidad}
+\subsection{Efecto de cambiar parámetros}
 
-En el escenario mediano se compararon diez iteraciones base, sin ruido de precios y sin permanencia mínima. Los hogares satisfechos finales fueron 20955, 20941 y 20966, respectivamente, sobre 32691 hogares: una variación menor a 0,1 puntos porcentuales. Sin permanencia no quedaron hogares bloqueados, como exige la definición. Las solicitudes y hogares sin destino variaron ampliamente entre escenarios en la décima iteración, indicando que una observación mensual aislada no caracteriza la dinámica; el análisis final deberá usar series completas y varias semillas.
+En la grilla mediana se compararon diez iteraciones con los valores originales, sin ruido de precios y sin permanencia mínima. Los hogares satisfechos finales fueron $20\,955$, $20\,941$ y $20\,966$, respectivamente, sobre $32\,691$ hogares: una variación menor a 0,1 puntos porcentuales. Sin permanencia no quedaron hogares bloqueados, como establece esa configuración. La cantidad de solicitudes y de hogares sin destino cambió entre los tres casos. Por eso una sola iteración no alcanza para describir toda la evolución del modelo.

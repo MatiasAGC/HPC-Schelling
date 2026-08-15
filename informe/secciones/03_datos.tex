@@ -1,4 +1,4 @@
-\section{Datos y generación de instancias}
+\section{Datos y generación de grillas}
 
 Para definir la composición socioeconómica se utilizó el informe INSE 2023, elaborado a partir de la Encuesta Continua de Hogares 2022 \cite{inse2023}. El informe divide los hogares de Montevideo en siete niveles, desde A+ hasta B$-$. En la simulación se agrupan en tres clases: alta, media y baja.
 
@@ -10,7 +10,7 @@ La Tabla~\ref{tab:datos-inse} muestra las proporciones publicadas para Montevide
 \label{tab:datos-inse}
 \begin{tabular}{l l r r}
 \toprule
-Nivel & Clase & Hogares (\%) & Ingreso \\
+Nivel & Clase & Hogares (\%) & Ingreso (miles) \\
 \midrule
 A+    & Alta  & 8,6  & 122,5 \\
 A$-$  & Alta  & 17,1 & 71,0  \\
@@ -27,9 +27,9 @@ B$-$  & Baja  & 5,0  & 9,9   \\
 
 El Censo 2023 se tomó como referencia para la relación entre viviendas ocupadas y vacías en Montevideo \cite{censo2023}. A partir de esos valores se usó inicialmente una ocupación cercana al 90\%. Con esa proporción y una permanencia mínima después de cada mudanza, las ejecuciones preliminares dejaron de producir movimientos en pocas iteraciones porque los hogares encontraban pocas viviendas disponibles que cumplieran todas las condiciones.
 
-La instancia principal mantiene un 88,5\% de celdas residenciales y ocupa el 80\% de esas viviendas. El resto queda disponible para las mudanzas. También se elimina la permanencia mínima, por lo que un hogar insatisfecho puede volver a buscar vivienda en la iteración siguiente. Estos cambios permiten observar la evolución del modelo durante más tiempo sin modificar las reglas de satisfacción ni la restricción económica.
+La grilla principal mantiene un 88,5\% de celdas residenciales y ocupa el 80\% de esas viviendas. El resto queda disponible para las mudanzas. También se elimina la permanencia mínima, por lo que un hogar insatisfecho puede volver a buscar vivienda en la iteración siguiente. Estos cambios permiten observar la evolución del modelo durante más tiempo. Las preferencias sociales y la exigencia de que el hogar pueda pagar la nueva vivienda continúan aplicándose.
 
-La grilla se genera a partir de una semilla. Primero se decide qué celdas son residenciales y cuáles están ocupadas. Luego se crean los hogares y se asignan los niveles sociales con las proporciones de la Tabla~\ref{tab:datos-inse}. Usar la misma semilla y la misma configuración produce siempre el mismo estado inicial. Cada mudanza ocupa una vivienda y libera otra, por lo que la cantidad de viviendas vacías se mantiene.
+La grilla se genera a partir de una semilla, que es el número que controla todas las decisiones pseudoaleatorias. Primero se decide qué celdas son residenciales y cuáles están ocupadas. Luego se crean los hogares y se asignan los niveles sociales con las proporciones de la Tabla~\ref{tab:datos-inse}. Usar la misma semilla y la misma configuración produce siempre el mismo estado inicial. Cada mudanza ocupa una vivienda y libera otra, por lo que la cantidad de viviendas vacías se mantiene.
 
 \subsection{Límites de la representación}
 

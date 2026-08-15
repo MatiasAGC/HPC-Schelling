@@ -8,8 +8,8 @@ Se comprobaron las reglas de ocupación, vecindario, tolerancia, precio, capacid
 
 \subsection{Equivalencia entre versiones}
 
-El escenario mínimo de $8\times6$ se ejecutó con uno, dos y tres procesos MPI, y también con las combinaciones de un proceso y cuatro hilos y de dos procesos y dos hilos. En todos los casos, el código de verificación de las dos primeras iteraciones fue igual al de la versión secuencial. La comparación es exacta porque las versiones aplican las mismas reglas y la misma forma de resolver empates. También se comprobó una grilla cuya altura no es divisible entre los procesos y el intercambio de filas en los bordes.
+El escenario mínimo de $8\times6$ se ejecutó con uno, dos y tres procesos MPI, y también con las combinaciones de un proceso y cuatro hilos y de dos procesos y dos hilos. En todos los casos, el estado de las dos primeras iteraciones fue igual al de la versión secuencial. La comparación es exacta porque las versiones aplican las mismas reglas y la misma forma de resolver empates. También se comprobó una grilla cuya altura no es divisible entre los procesos y el intercambio de filas auxiliares en los bordes.
 
-\subsection{Checkpoint y reinicio}
+\subsection{Guardado y reinicio}
 
 Un escenario se ejecutó de dos formas: sin interrupciones y guardando el estado después del primer mes para continuarlo más tarde. Ambos caminos terminaron con el mismo resultado. El programa también rechaza un archivo alterado o creado con una configuración incompatible.

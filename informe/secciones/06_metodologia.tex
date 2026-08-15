@@ -2,40 +2,36 @@
 
 \subsection{Plataformas}
 
-El entorno local de desarrollo es WSL2 con Ubuntu 24.04 x86-64 sobre un AMD Ryzen 5 3600 de seis núcleos y doce hilos, 7,7~GiB de memoria y 16~MiB de caché L3. Se utilizó GCC 13.3.0 y Open MPI 4.1.6. El proyecto se construye principalmente con CMake y mantiene un Makefile portable para el entorno académico.
+Las mediciones locales se realizaron en WSL2 con Ubuntu 24.04 sobre un AMD Ryzen 5 3600 de seis núcleos y doce hilos, 7,7~GiB de memoria y 16~MiB de caché L3. Se utilizó GCC 13.3.0 y Open MPI 4.1.6.
 
-El programa se escribió en C11 y se compiló con advertencias estrictas. Durante el desarrollo también se revisaron el formato, posibles errores de memoria y usos incorrectos de variables. Los comandos principales de compilación y ejecución se conservan en el archivo \texttt{README.md}.
+El programa se escribió en C11. Los comandos necesarios para compilarlo y ejecutarlo se encuentran en \texttt{README.md}.
 
 Las mediciones de FING se realizaron el 9 de agosto de 2026 en los equipos
 \texttt{pcunix40} y \texttt{pcunix42}. Cada equipo posee un Intel Core i3-4170
 a 3,70~GHz, dos núcleos físicos, cuatro hilos lógicos, 15~GiB de memoria y
-3~MiB de caché L3. Ambos ejecutaban Fedora Linux con kernel 6.19.14. Se utilizó
-GCC 15.2.1 y MPICH 4.2.2, habilitado mediante el módulo
-\texttt{mpi/mpich-x86\_64}. Los trabajos se lanzaron directamente por SSH sobre
-los dos equipos disponibles, sin un planificador. El equipo \texttt{lulu} se
-utilizó únicamente como punto de acceso. MPICH se ejecutó con el proveedor TCP
-para utilizar la red Ethernet de las pcunix.
+3~MiB de caché L3. Ambos ejecutaban Fedora Linux y estaban conectados por red
+Ethernet. Se utilizó GCC 15.2.1 y MPICH 4.2.2.
 
 \subsection{Configuraciones y procedimiento}
 
-Para medir escalabilidad fuerte se mantiene fija la instancia y se cambia la cantidad de procesos MPI e hilos OpenMP. Los checkpoints se desactivan y todas las configuraciones deben terminar con el mismo hash.
+Para medir escalabilidad fuerte se mantiene fija la grilla y se cambia la cantidad de procesos MPI e hilos OpenMP. Los archivos de reinicio se desactivan y todas las configuraciones deben terminar con el mismo código de verificación.
 
 Para observar el cambio espacial se reconstruye la grilla inicial con la misma semilla y se lee el estado final guardado por la simulación. Cada celda se pinta según su clase social, o como vivienda vacía o celda no residencial. Además se calcula, para cada hogar no aislado, la proporción ponderada de vecinos de su misma clase. El promedio de esas proporciones permite comparar el agrupamiento inicial y final con un único valor. Se usan el mismo radio y los mismos pesos del modelo.
 
-Las reglas se comprobaron con grillas pequeñas de resultado conocido. Para comparar cambios de parámetros se usó una grilla de $256\times160$. Antes de ejecutar la instancia principal se midió una grilla de $1024\times640$ con un calentamiento y cinco repeticiones por configuración. Esta medición también mostró que la combinación inicial de ocupación y permanencia dejaba de producir mudanzas demasiado pronto.
+Las reglas se comprobaron con grillas pequeñas de resultado conocido. Para comparar cambios de parámetros se usó una grilla de $256\times160$. Antes de la evaluación principal se midió una grilla de $1024\times640$. Se realizó una ejecución previa que no se midió y luego cinco repeticiones por configuración. Esta prueba también mostró que la combinación inicial de ocupación y permanencia dejaba de producir mudanzas demasiado pronto.
 
-La instancia principal \texttt{hpc.conf} tiene $4096\times2560$ celdas y 240 iteraciones. Mantiene la distribución social, las preferencias y la regla económica; usa 20\% de viviendas vacías, permanencia cero, financiación de 60\%, plazo de 360 meses y un límite de cuota de 40\% del ingreso. La grilla es una carga sintética y no una estimación de la cantidad de viviendas de Montevideo.
+La evaluación principal usa \texttt{hpc.conf}, con $4096\times2560$ celdas y 240 iteraciones. Mantiene la distribución social y las preferencias; usa 20\% de viviendas vacías, permanencia cero, financiación de 60\%, plazo de 360 meses y un límite de cuota de 40\% del ingreso. La grilla es sintética y no estima la cantidad de viviendas de Montevideo.
 
-Debido a la duración de la instancia grande, la campaña principal realiza una ejecución de cada configuración. Las mediciones más pequeñas y repetidas se conservan como referencia de variación. Se comparan la versión secuencial y las configuraciones $1\times1$, $1\times2$, $1\times4$, $2\times1$, $2\times2$ y $2\times4$. El primer número indica procesos MPI y el segundo, hilos OpenMP por proceso.
+Debido a la duración de la grilla grande, se realiza una ejecución de cada configuración. Las mediciones más pequeñas y repetidas sirven para observar cuánto pueden variar los tiempos. Se comparan la versión secuencial y las configuraciones $1\times1$, $1\times2$, $1\times4$, $2\times1$, $2\times2$ y $2\times4$. El primer número indica procesos MPI y el segundo, hilos OpenMP por proceso.
 
 \subsection{Métricas}
 
-Para $T_1$ secuencial y $T_p$ paralelo, se calculan
+Sea $T_1$ el tiempo secuencial, $T_p$ el tiempo paralelo y $p$ el producto entre la cantidad de procesos y los hilos usados por proceso. El speedup $S_p$ indica cuántas veces se redujo el tiempo y la eficiencia $E_p$ indica qué fracción del uso ideal de los recursos se alcanzó. Se calculan como
 \begin{equation}
 S_p=\frac{T_1}{T_p}, \qquad E_p=\frac{S_p}{p}.
 \end{equation}
-También se miden tiempos máximos por fase, desbalance $L=\max_i W_i/\overline{W}$, volumen lógico de comunicación y métricas funcionales del modelo. El trabajo $W_i$ es la cantidad de hogares elegibles cuya búsqueda de destino pertenece al proceso $i$.
+También se mide el tiempo de cada fase, la cantidad estimada de datos intercambiados y el reparto del trabajo. Para este último se usa $L=\max_i W_i/\overline{W}$, donde $W_i$ es la cantidad de hogares que debe procesar el proceso $i$. Un valor de $L$ cercano a 1 indica que todos reciben una cantidad similar. Además se registran hogares satisfechos, solicitudes y mudanzas aceptadas.
 
-\subsection{Reproducibilidad}
+\subsection{Cómo repetir una ejecución}
 
-El proyecto se compila con CMake y cada versión recibe un archivo mediante \texttt{--config}. La ejecución secuencial usa \texttt{schelling\_seq}; la híbrida se inicia con \texttt{mpirun}, indicando los procesos y la variable \texttt{OMP\_NUM\_THREADS}. Para fijar la afinidad se utilizaron \texttt{OMP\_PLACES=cores} y \texttt{OMP\_PROC\_BIND=close}. La salida incluye la configuración efectiva, métricas y tiempos por iteración, datos de comunicación y el estado final. Con \texttt{hpc.conf} y semilla 42, todas las configuraciones finalizaron con el hash \texttt{6b39928d840ed346}.
+El proyecto se compila con CMake y cada versión recibe un archivo mediante \texttt{--config}. La ejecución secuencial usa \texttt{schelling\_seq}; la híbrida se inicia con \texttt{mpirun}, indicando los procesos y la variable \texttt{OMP\_NUM\_THREADS}. Para mantener los hilos en núcleos definidos se utilizaron \texttt{OMP\_PLACES=cores} y \texttt{OMP\_PROC\_BIND=close}. La salida incluye los valores usados, las métricas, los tiempos por iteración, los datos de comunicación y el estado final. Con \texttt{hpc.conf} y semilla 42, todas las configuraciones terminaron con el mismo código de verificación.

@@ -2,15 +2,15 @@
 
 \subsection{Descomposición con MPI}
 
-La grilla se divide en franjas horizontales contiguas con igual cantidad de filas, salvo una diferencia máxima de una. Cada proceso queda encargado de una franja y calcula la satisfacción, los precios y las solicitudes de sus hogares y viviendas. Para evaluar un vecindario que cruza un límite, también recibe las $r$ filas más cercanas de la franja vecina. Estas filas auxiliares permiten completar el vecindario de las viviendas cercanas al borde. La división reparte una cantidad similar de celdas, aunque no garantiza la misma cantidad de hogares si la ocupación es desigual.
+La grilla se divide en franjas horizontales contiguas con igual cantidad de filas, salvo una diferencia máxima de una. Cada proceso queda encargado de una franja y calcula la satisfacción, los precios y las solicitudes de sus hogares y viviendas. El radio del vecindario es $r=2$, por lo que cada proceso recibe también las dos filas más cercanas de cada franja vecina. Estas filas auxiliares permiten completar el vecindario de las viviendas cercanas al borde. La división reparte una cantidad similar de celdas, aunque no garantiza la misma cantidad de hogares si la ocupación es desigual.
 
-Para mantener una versión distribuida sencilla, cada proceso conserva una copia completa de los identificadores, hogares y vacantes compatibles. Sin embargo, solamente el proceso encargado de una franja calcula sus resultados. Esta decisión facilita que todos los procesos terminen con el mismo estado, pero aumenta la memoria y la comunicación.
+Para mantener una versión distribuida sencilla, cada proceso conserva una copia completa de los identificadores, los hogares y las viviendas vacías que cumplen las condiciones de cada nivel social. Sin embargo, solamente el proceso encargado de una franja calcula sus resultados. Esta decisión facilita que todos los procesos terminen con el mismo estado, pero aumenta la memoria y la comunicación.
 
 \subsection{Comunicación entre procesos}
 
 En cada iteración, un proceso calcula solamente los hogares y las viviendas de su franja. Después, todos comparten sus resultados mediante \texttt{MPI\_Allreduce}. Esta operación combina las partes calculadas por cada proceso y deja en todos una copia completa de la satisfacción, los precios y los destinos propuestos. Como todos reciben la misma información, pueden resolver los conflictos y aplicar las mudanzas en el mismo orden.
 
-Al terminar la iteración, cada proceso actualiza con sus vecinos las $r$ filas auxiliares ubicadas junto al límite de su franja. Así quedan prontas para calcular los vecindarios de la iteración siguiente.
+Al terminar la iteración, cada proceso actualiza con sus vecinos las dos filas auxiliares ubicadas junto a cada límite de su franja. Así quedan prontas para calcular los vecindarios de la iteración siguiente.
 
 Una mudanza se considera remota cuando la vivienda actual está en la franja de un proceso y la vivienda elegida está en la franja de otro. El hogar conserva su identificador y no se envía por separado. Como todos los procesos actualizan la misma mudanza en sus copias, en la iteración siguiente la fila de la nueva vivienda determina qué proceso debe calcular ese hogar. La cantidad de mudanzas remotas se registra para medir cuánto trabajo cruza las divisiones de la grilla.
 
@@ -24,6 +24,6 @@ El trabajo de los hilos termina antes de comenzar la comunicación entre proceso
 
 \subsection{Corrección y resultados repetibles}
 
-Al final de cada iteración se calcula un código corto a partir de todo el estado de la simulación. Los procesos comparan ese código y detienen la ejecución si alguno obtuvo un estado diferente. Así se puede detectar la primera iteración en la que aparece un error de sincronización.
+Al final de cada iteración se calcula un código de verificación, o hash, a partir de todo el estado de la simulación. Los procesos comparan ese código y detienen la ejecución si alguno obtuvo un estado diferente. Así se puede detectar la primera iteración en la que aparece un error de sincronización.
 
 También se comparó el estado completo de la versión secuencial con ejecuciones de uno, dos y tres procesos, y con distintas cantidades de hilos. Todas produjeron el mismo resultado para una configuración y semilla dadas.

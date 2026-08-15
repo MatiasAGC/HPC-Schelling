@@ -2,13 +2,13 @@
 
 \subsection{Grilla, viviendas y hogares}
 
-Montevideo se representa mediante una grilla bidimensional rectangular con celdas residenciales y no residenciales, siguiendo la abstracción espacial del modelo clásico de Schelling. Una celda residencial contiene como máximo una vivienda, que puede estar ocupada o vacía. Los hogares se clasifican en siete subestratos y tres clases socioeconómicas.
+Montevideo se representa mediante una grilla rectangular con celdas residenciales y no residenciales, como en el modelo clásico de Schelling. Una celda residencial contiene como máximo una vivienda, que puede estar ocupada o vacía. Los hogares se clasifican en siete niveles y tres clases socioeconómicas.
 
-Se usan grillas de distintos tamaños para observar cómo cambia el costo de la simulación al aumentar la cantidad de hogares. La grilla más grande es sintética y su tamaño no representa la cantidad real de viviendas de Montevideo; se eligió para que el cálculo de vecindarios y la búsqueda de destinos tengan suficiente trabajo. Los tamaños evaluados se detallan en la Sección~VI. La grilla se divide en ocho franjas que no corresponden a los municipios reales. Los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
+Se usan grillas de distintos tamaños para observar cómo cambia el costo de la simulación al aumentar la cantidad de hogares. La grilla más grande es sintética y su tamaño no representa la cantidad real de viviendas de Montevideo; se eligió para que el cálculo de vecindarios y la búsqueda de destinos tengan suficiente trabajo. Los tamaños evaluados se detallan en la Sección~VI. Para agrupar resultados, el modelo divide la grilla en ocho zonas verticales que no corresponden a los municipios reales. Esta división es distinta de las franjas horizontales asignadas a los procesos MPI. Los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
 
 \subsection{Vecindario y ponderación}
 
-Para una celda residencial $c$, el vecindario de radio $r$ se define como
+Sea $C_R$ el conjunto de celdas residenciales y $d(c,c')$ la distancia entre dos celdas. Para una celda $c$, su vecindario de radio $r$ se define como
 \begin{equation}
 N_r(c)=\{c'\in C_R : d(c,c')\leq r\}.
 \end{equation}
@@ -17,32 +17,32 @@ La influencia disminuye con la distancia mediante una función gaussiana,
 w(c,c')=\exp\left(-\frac{d(c,c')^2}{2\sigma^2}\right).
 \end{equation}
 
-Los escenarios usan distancia de Chebyshev con $r=2$, por lo que consideran un cuadrado de hasta 24 vecinos. El peso se calcula con distancia euclidiana y $\sigma=1{,}0$, de modo que los vecinos más lejanos influyen menos.
+Los escenarios usan distancia de Chebyshev con $r=2$: una celda es vecina si la diferencia de filas y la diferencia de columnas no superan 2. Esto forma un cuadrado de $5\times5$ celdas y, al excluir la celda central, quedan como máximo 24 vecinos. El peso usa la distancia euclidiana, es decir, la distancia en línea recta. El valor $\sigma$ controla qué tan rápido disminuye la influencia y se fija en $1{,}0$.
 
 \subsection{Satisfacción y tolerancias}
 
-La proporción ponderada de cada clase se compara con una matriz configurable de preferencias mínimas y tolerancias máximas. La propia unidad familiar no participa del cálculo.
+La proporción ponderada de cada clase se compara con los límites mínimos y máximos definidos para el hogar. El propio hogar no participa del cálculo.
 
-Cuando no existe ningún hogar vecino, la unidad familiar se considera satisfecha por aislamiento. La misma regla se aplica al evaluar una vivienda candidata y estos casos se contabilizan por separado en las métricas. Esta convención evita asignar proporciones artificiales a un denominador vacío.
+Cuando no existe ningún hogar vecino, el hogar se considera satisfecho por aislamiento. La misma regla se aplica al evaluar una vivienda candidata y estos casos se cuentan por separado. Así no es necesario inventar proporciones cuando no hay vecinos.
 
 Una unidad de clase alta exige al menos 70\% de vecinos altos, como máximo 30\% medios y 5\% bajos. Una unidad media exige como máximo 70\% altos, al menos 50\% medios y como máximo 40\% bajos. Una unidad baja exige como máximo 80\% altos, 90\% medios y al menos 2\% bajos. Todas las condiciones de la clase deben cumplirse al mismo tiempo.
 
 \subsection{Precios y restricción económica}
 
-El precio propuesto sigue un modelo hedónico simplificado:
+El precio se calcula mediante la siguiente expresión:
 \begin{equation}
 \log p_v(t)=\alpha_0+\beta_1D_v(t)+\beta_2A_v(t)+\epsilon_v(t).
 \end{equation}
-La demanda $D_v(t)$ es la proporción ponderada de viviendas residenciales ocupadas del vecindario. El poder adquisitivo $A_v(t)$ es el ingreso medio ponderado de sus hogares, normalizado entre los ingresos de referencia de B$-$ y A+. Ambas variables pertenecen a $[0,1]$; cuando no existe un denominador válido se asigna cero.
+En la expresión, $p_v(t)$ es el precio de la vivienda $v$ en la iteración $t$. El valor $\alpha_0$ fija el nivel general de los precios, mientras que $\beta_1$ y $\beta_2$ controlan la influencia de la demanda y del poder adquisitivo. La demanda $D_v(t)$ es la proporción ponderada de viviendas residenciales ocupadas del vecindario. El poder adquisitivo $A_v(t)$ es el ingreso medio ponderado de los hogares vecinos, llevado a una escala entre 0 y 1 usando como extremos los ingresos de B$-$ y A+. Cuando no hay viviendas u hogares vecinos para realizar alguno de estos cálculos, el valor correspondiente es cero.
 
 El término $\epsilon_v(t)$ introduce pequeñas diferencias entre viviendas que tendrían el mismo precio. Puede aumentar o reducir el valor y su promedio es cero, por lo que no empuja todos los precios en una misma dirección. Su desviación es $0{,}05$ y se limita al intervalo $[-0{,}15;0{,}15]$ para evitar cambios extremos. Se calcula a partir de la semilla, la vivienda y la iteración, de modo que una misma ejecución siempre produce los mismos precios.
 
-Los ingresos del INSE corresponden a valores de 2022. Para trabajar con números más pequeños, el modelo expresa tanto los ingresos como los precios en miles de pesos: por ejemplo, un ingreso de $33{,}2$ representa $33\,200$ pesos mensuales. Para aproximar la cuota se usa una anualidad de cuota fija sobre el 80\% del precio, con tasa nominal anual de 6\% y plazo de 240 meses. Estos parámetros son configurables y no pretenden reproducir un producto hipotecario real. Una vivienda es accesible cuando su cuota no supera la fracción $\rho$ del ingreso del hogar.
+Los ingresos del INSE corresponden a valores de 2022. Para trabajar con números más pequeños, el modelo expresa tanto los ingresos como los precios en miles de pesos: por ejemplo, un ingreso de $33{,}2$ representa $33\,200$ pesos mensuales. La cuota se aproxima como la de un préstamo de pagos mensuales fijos sobre el 80\% del precio, con tasa anual de 6\% y plazo de 240 meses. Estos valores no pretenden reproducir un préstamo bancario particular. Una vivienda es accesible cuando su cuota no supera la fracción $\rho$ del ingreso del hogar.
 
-La configuración base adopta $\beta_1=0{,}40$, $\beta_2=0{,}60$ y $\rho=0{,}30$. El valor $\alpha_0$ fija el nivel general de los precios. Se calcula para que un hogar M, en un entorno con $D=0{,}90$ y el poder adquisitivo correspondiente a su ingreso, pague una cuota equivalente al 25\% de dicho ingreso. Con los supuestos financieros anteriores se obtiene un precio de referencia de $1448{,}15$, equivalente a $1\,448\,150$ pesos de 2022, y $\alpha_0=6{,}793886203$. Esta cuota deja un margen respecto del límite de accesibilidad del 30\%.
+La configuración preliminar adopta $\beta_1=0{,}40$, $\beta_2=0{,}60$ y $\rho=0{,}30$. El valor $\alpha_0$ se calcula para que un hogar M, en un entorno con $D=0{,}90$ y el poder adquisitivo correspondiente a su ingreso, pague una cuota equivalente al 25\% de dicho ingreso. Con los valores financieros anteriores se obtiene un precio de referencia de $1448{,}15$, equivalente a $1\,448\,150$ pesos de 2022, y $\alpha_0=6{,}793886203$. Esta cuota deja un margen respecto del límite de accesibilidad del 30\%.
 
 \subsection{Mudanzas y evolución temporal}
 
-La simulación es síncrona. Los hogares insatisfechos y no bloqueados solicitan destinos accesibles; los conflictos se resuelven de forma determinista antes de aplicar simultáneamente las mudanzas. Una vivienda liberada queda disponible en la iteración siguiente.
+Cada iteración representa un mes. Primero se calculan todas las solicitudes sin modificar la grilla. Luego se resuelven los casos en los que varios hogares eligieron la misma vivienda y finalmente se aplican juntas las mudanzas aceptadas. Por eso una vivienda liberada queda disponible recién en la iteración siguiente.
 
-En la configuración preliminar, un hogar que se muda queda bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. La instancia principal usa permanencia cero porque con el bloqueo y una ocupación mayor la simulación dejaba de registrar mudanzas en pocas iteraciones.
+En la configuración preliminar, un hogar que se muda queda bloqueado durante los 12 meses siguientes y vuelve a ser elegible en $t+13$. La evaluación principal usa permanencia cero porque con el bloqueo y una ocupación mayor la simulación dejaba de registrar mudanzas en pocas iteraciones.
