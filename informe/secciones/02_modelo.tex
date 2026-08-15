@@ -4,7 +4,7 @@
 
 Montevideo se representa mediante una grilla rectangular con celdas residenciales y no residenciales, como en el modelo clásico de Schelling. Una celda residencial contiene como máximo una vivienda, que puede estar ocupada o vacía. Los hogares se clasifican en siete niveles y tres clases socioeconómicas.
 
-Se usan grillas de distintos tamaños para observar cómo cambia el costo de la simulación al aumentar la cantidad de hogares. La grilla más grande es sintética y su tamaño no representa la cantidad real de viviendas de Montevideo; se eligió para que el cálculo de vecindarios y la búsqueda de destinos tengan suficiente trabajo. Los tamaños evaluados se detallan en la Sección~VI. Para agrupar resultados, el modelo divide la grilla en ocho zonas verticales que no corresponden a los municipios reales. Esta división es distinta de las franjas horizontales asignadas a los procesos MPI. Los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
+Se usan grillas de distintos tamaños para observar cómo cambia el costo de la simulación al aumentar la cantidad de hogares. La grilla más grande es sintética y su tamaño no representa la cantidad real de viviendas de Montevideo; se eligió para que el cálculo de vecindarios y la búsqueda de destinos tengan suficiente trabajo. Los tamaños evaluados se detallan en la Sección~VI. Cada celda recibe además una de ocho etiquetas de zona dispuestas en franjas verticales. Estas etiquetas no modifican los precios, las preferencias ni las mudanzas y no corresponden a los municipios reales. Son distintas de las franjas horizontales asignadas a los procesos MPI. Los vecindarios se recortan en los límites y los extremos opuestos no se conectan.
 
 \subsection{Vecindario y ponderación}
 

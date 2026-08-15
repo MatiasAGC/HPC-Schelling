@@ -1,6 +1,6 @@
 # HPC-Schelling
 
-Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segregación residencial basado en Schelling y parametrizado con datos agregados de Montevideo.
+Simulación secuencial y paralela híbrida (MPI + OpenMP) de un modelo de segregación residencial basado en Schelling y configurado con datos generales de Montevideo.
 
 ## Contenido
 
@@ -30,9 +30,9 @@ Las configuraciones incluidas son:
 
 | Archivo | Uso |
 |---|---|
-| `base.conf` | escenario funcional de `1024×640` y 120 iteraciones |
-| `hpc.conf` | instancia principal de rendimiento de `4096×2560` y 240 iteraciones |
-| `mediana.conf` | escenario corto de `256×160` para sensibilidad |
+| `base.conf` | grilla preliminar de `1024×640` y 120 iteraciones |
+| `hpc.conf` | grilla principal de `4096×2560` y 240 iteraciones |
+| `mediana.conf` | grilla corta de `256×160` para comparar parámetros |
 | `mediana_sin_ruido.conf` | escenario mediano sin variación aleatoria de precios |
 | `mediana_sin_permanencia.conf` | escenario mediano sin bloqueo posterior a una mudanza |
 
@@ -47,7 +47,7 @@ de celdas no representa la población real de Montevideo.
 OMP_NUM_THREADS=2 mpirun -np 2 ./build/schelling_hybrid --config config/base.conf --validate
 ```
 
-El ejecutable secuencial genera el estado inicial y ejecuta la cantidad configurada de iteraciones. El ejecutable híbrido reparte satisfacción, actualización de precios y búsquedas entre procesos MPI e hilos OpenMP; consolida solicitudes globalmente e intercambia halos entre franjas vecinas. Para ejecuciones locales se recomienda fijar afinidad:
+El ejecutable secuencial genera el estado inicial y ejecuta la cantidad configurada de iteraciones. El ejecutable híbrido reparte satisfacción, actualización de precios y búsquedas entre procesos MPI e hilos OpenMP; consolida solicitudes globalmente e intercambia filas auxiliares entre franjas vecinas. Para ejecuciones locales se recomienda fijar afinidad:
 
 ```bash
 OMP_NUM_THREADS=4 OMP_PROC_BIND=close OMP_PLACES=cores \
@@ -77,7 +77,7 @@ media de vecinos de la misma clase y crea las dos grillas en formato PPM:
 
 ```bash
 ./build/schelling_analizar --config config/hpc.conf \
-  --state results/fing/hpc/estado_final.bin --output results/fing/hpc/grilla
+  --state salida/estado_final.bin --output salida/grilla
 ```
 
 Los colores son naranja para clase alta, azul para clase media, verde para clase baja, gris claro

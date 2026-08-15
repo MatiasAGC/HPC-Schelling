@@ -24,6 +24,4 @@ El trabajo de los hilos termina antes de comenzar la comunicación entre proceso
 
 \subsection{Corrección y resultados repetibles}
 
-Al final de cada iteración se calcula un código de verificación, o hash, a partir de todo el estado de la simulación. Los procesos comparan ese código y detienen la ejecución si alguno obtuvo un estado diferente. Así se puede detectar la primera iteración en la que aparece un error de sincronización.
-
-También se comparó el estado completo de la versión secuencial con ejecuciones de uno, dos y tres procesos, y con distintas cantidades de hilos. Todas produjeron el mismo resultado para una configuración y semilla dadas.
+Al final de cada iteración se calcula un código de verificación de 64 bits, o hash. Para obtenerlo se recorren siempre en el mismo orden las dimensiones, las celdas y los hogares, y sus valores se incorporan a un único número. El hash no interviene en el modelo: los procesos lo comparan y se detienen si alguno obtuvo un estado diferente. Dos estados podrían producir el mismo código, aunque sea muy poco probable, por lo que se usa como control rápido y no como una demostración. Las pruebas pequeñas lo complementan verificando las reglas, los conflictos y la conservación de hogares y viviendas vacías.
