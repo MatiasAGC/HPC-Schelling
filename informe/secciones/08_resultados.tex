@@ -30,19 +30,24 @@ MPI & OMP & $T$ (s) & $S_p$ & $E_p$ \\
     height=0.62\columnwidth,
     xlabel={Recursos de cómputo},
     ylabel={Speedup},
+    xmode=log,
+    log basis x={2},
     xmin=1,xmax=8,
     ymin=0,ymax=4,
     xtick={1,2,4,8},
+    xticklabels={1,2,4,8},
     grid=major,
     legend style={font=\scriptsize,at={(0.97,0.03)},anchor=south east}
 ]
 \addplot[dashed,gray] coordinates {(1,1) (2,2) (4,4)};
 \addlegendentry{Ideal}
-\addplot[mark=*,blue] coordinates {(1,0.991) (2,1.964) (4,1.943) (4,1.957) (8,3.366)};
-\addlegendentry{Medido}
+\addplot[mark=*,blue] coordinates {(1,0.991) (2,1.964) (4,1.943)};
+\addlegendentry{Una máquina}
+\addplot[mark=square*,red] coordinates {(4,1.957) (8,3.366)};
+\addlegendentry{Dos máquinas}
 \end{axis}
 \end{tikzpicture}
-\caption{Speedup local respecto a la versión secuencial. Los dos puntos de cuatro recursos corresponden a $1\times4$ y $2\times2$.}
+\caption{Speedup local respecto a la versión secuencial.}
 \label{fig:speedup-local}
 \end{figure}
 
@@ -90,9 +95,12 @@ MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Comunicación \\
     height=0.62\columnwidth,
     xlabel={Recursos de cómputo},
     ylabel={Speedup},
+    xmode=log,
+    log basis x={2},
     xmin=1,xmax=8,
     ymin=0,ymax=2,
     xtick={1,2,4,8},
+    xticklabels={1,2,4,8},
     grid=major,
     legend style={font=\scriptsize,at={(0.97,0.97)},anchor=north east}
 ]
@@ -156,9 +164,12 @@ MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Desbalance \\
     height=0.62\columnwidth,
     xlabel={Recursos de cómputo},
     ylabel={Speedup},
+    xmode=log,
+    log basis x={2},
     xmin=1,xmax=8,
     ymin=0,ymax=2.2,
     xtick={1,2,4,8},
+    xticklabels={1,2,4,8},
     grid=major,
     legend style={font=\scriptsize,at={(0.97,0.03)},anchor=south east}
 ]
