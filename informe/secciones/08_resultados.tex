@@ -58,14 +58,14 @@ Con dos procesos el desbalance medio de trabajo fue 1,002, muy cercano al repart
 
 Una medición adicional de las 120 iteraciones mostró un comportamiento diferente. La versión secuencial demoró entre 32 y 36~s. La configuración $2\times4$ demoró entre 19,8 y 26,0~s; su mejor speedup observado fue 1,63. Como se obtuvo una sola medida por configuración, estos valores se usaron solamente para estimar la duración. La mejora fue menor porque, cuando dejaron de existir destinos válidos, la comunicación y las tareas que no se reparten tuvieron más peso que la búsqueda paralela.
 
-\subsection{Medición preliminar en FING}
+\subsection{Medición preliminar en la Facultad de Ingeniería}
 
 La Tabla~\ref{tab:resultados-fing} muestra las medianas de cinco repeticiones
 de la grilla de $1024\times640$ durante 120 iteraciones. Todas las configuraciones terminaron con el mismo estado que la versión secuencial.
 
 \begin{table}[ht]
 \centering
-\caption{Escalabilidad fuerte en FING para 120 iteraciones}
+\caption{Escalabilidad fuerte en la Facultad de Ingeniería para 120 iteraciones}
 \label{tab:resultados-fing}
 \begin{tabular}{rrrrrr}
 \toprule
@@ -104,7 +104,7 @@ MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Comunicación \\
 \addlegendentry{Dos nodos}
 \end{axis}
 \end{tikzpicture}
-\caption{Speedup en FING respecto a la versión secuencial.}
+\caption{Speedup en la Facultad de Ingeniería respecto a la versión secuencial.}
 \label{fig:speedup-fing}
 \end{figure}
 
@@ -131,7 +131,7 @@ todas las configuraciones paralelas terminaron con el mismo estado.
 
 \begin{table}[ht]
 \centering
-\caption{Escalabilidad fuerte de la grilla principal en FING}
+\caption{Escalabilidad fuerte de la grilla principal en la Facultad de Ingeniería}
 \label{tab:resultados-hpc}
 \begin{tabular}{rrrrrr}
 \toprule
