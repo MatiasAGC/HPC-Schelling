@@ -2,15 +2,15 @@
 
 \subsection{Descomposición con MPI}
 
-La grilla se divide en franjas horizontales contiguas con igual cantidad de filas, salvo una diferencia máxima de una. Cada proceso queda encargado de una franja y calcula la satisfacción, los precios y las solicitudes de sus hogares y viviendas. Para evaluar un vecindario que cruza un límite, también recibe las $r$ filas más cercanas de la franja vecina. Estas filas auxiliares se denominan halo. La división reparte una cantidad similar de celdas, aunque no garantiza la misma cantidad de hogares si la ocupación es desigual.
+La grilla se divide en franjas horizontales contiguas con igual cantidad de filas, salvo una diferencia máxima de una. Cada proceso queda encargado de una franja y calcula la satisfacción, los precios y las solicitudes de sus hogares y viviendas. Para evaluar un vecindario que cruza un límite, también recibe las $r$ filas más cercanas de la franja vecina. Estas filas auxiliares permiten completar el vecindario de las viviendas cercanas al borde. La división reparte una cantidad similar de celdas, aunque no garantiza la misma cantidad de hogares si la ocupación es desigual.
 
-Para mantener una versión distribuida sencilla, cada proceso conserva una copia completa de los identificadores, hogares y vacantes compatibles. Sin embargo, solo el dueño de una franja calcula sus resultados. Esta decisión facilita que todos los procesos terminen con el mismo estado, pero aumenta la memoria y la comunicación.
+Para mantener una versión distribuida sencilla, cada proceso conserva una copia completa de los identificadores, hogares y vacantes compatibles. Sin embargo, solamente el proceso encargado de una franja calcula sus resultados. Esta decisión facilita que todos los procesos terminen con el mismo estado, pero aumenta la memoria y la comunicación.
 
 \subsection{Comunicación entre procesos}
 
 En cada iteración, un proceso calcula solamente los hogares y las viviendas de su franja. Después, todos comparten sus resultados mediante \texttt{MPI\_Allreduce}. Esta operación combina las partes calculadas por cada proceso y deja en todos una copia completa de la satisfacción, los precios y los destinos propuestos. Como todos reciben la misma información, pueden resolver los conflictos y aplicar las mudanzas en el mismo orden.
 
-Al terminar la iteración, cada proceso también intercambia con sus vecinos las filas que están junto al límite de su franja. Estas filas forman el halo y permiten calcular un vecindario que cruza el borde entre dos franjas.
+Al terminar la iteración, cada proceso actualiza con sus vecinos las $r$ filas auxiliares ubicadas junto al límite de su franja. Así quedan prontas para calcular los vecindarios de la iteración siguiente.
 
 Una mudanza se considera remota cuando la vivienda actual está en la franja de un proceso y la vivienda elegida está en la franja de otro. El hogar conserva su identificador y no se envía por separado. Como todos los procesos actualizan la misma mudanza en sus copias, en la iteración siguiente la fila de la nueva vivienda determina qué proceso debe calcular ese hogar. La cantidad de mudanzas remotas se registra para medir cuánto trabajo cruza las divisiones de la grilla.
 
