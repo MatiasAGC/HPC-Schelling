@@ -24,7 +24,7 @@ El costo puede expresarse mediante tres cantidades: $H$ es el número de hogares
 
 \subsection{Reproducibilidad y checkpoints}
 
-Cada valor pseudoaleatorio se calcula a partir de la semilla, la iteración, el identificador del hogar o vivienda y el uso que tendrá el valor. Para realizar esta combinación se utiliza SplitMix64. De esta manera, el resultado no depende del orden en que se procesan los hogares y puede repetirse con distintas cantidades de procesos o hilos. El ruido de los precios se obtiene mediante Box--Muller y se limita al intervalo configurado.
+Cada valor pseudoaleatorio se calcula a partir de la semilla, la iteración, el identificador del hogar o vivienda y el uso que tendrá el valor. Estos datos se combinan mediante una función de mezcla de 64 bits implementada en el programa. De esta manera, el resultado no depende del orden en que se procesan los hogares y puede repetirse con distintas cantidades de procesos o hilos. El ruido de los precios se obtiene a partir de dos valores uniformes y se limita al intervalo configurado.
 
 El checkpoint binario guarda la próxima iteración, las dimensiones, la configuración, las celdas y los hogares. Se escribe primero en un archivo temporal y se renombra cuando está completo. Al cargarlo se revisa que el archivo no esté incompleto o alterado y que corresponda a la misma configuración. En las mediciones de rendimiento los checkpoints se desactivan para que la escritura en disco no altere los tiempos.
 
