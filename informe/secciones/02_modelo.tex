@@ -33,7 +33,9 @@ El precio propuesto sigue un modelo hedónico simplificado:
 \begin{equation}
 \log p_v(t)=\alpha_0+\beta_1D_v(t)+\beta_2A_v(t)+\epsilon_v(t).
 \end{equation}
-La demanda $D_v(t)$ es la proporción ponderada de viviendas residenciales ocupadas del vecindario. El poder adquisitivo $A_v(t)$ es el ingreso medio ponderado de sus hogares, normalizado entre los ingresos de referencia de B$-$ y A+. Ambas variables pertenecen a $[0,1]$; cuando no existe un denominador válido se asigna cero. El ruido $\epsilon_v(t)$ sigue una normal con media cero y desviación $0{,}05$, truncada a $[-0{,}15;0{,}15]$, y se genera de forma determinista por vivienda e iteración mediante un generador sin estado compartido.
+La demanda $D_v(t)$ es la proporción ponderada de viviendas residenciales ocupadas del vecindario. El poder adquisitivo $A_v(t)$ es el ingreso medio ponderado de sus hogares, normalizado entre los ingresos de referencia de B$-$ y A+. Ambas variables pertenecen a $[0,1]$; cuando no existe un denominador válido se asigna cero.
+
+El término $\epsilon_v(t)$ introduce pequeñas diferencias entre viviendas que tendrían el mismo precio. Puede aumentar o reducir el valor y su promedio es cero, por lo que no empuja todos los precios en una misma dirección. Su desviación es $0{,}05$ y se limita al intervalo $[-0{,}15;0{,}15]$ para evitar cambios extremos. Se calcula a partir de la semilla, la vivienda y la iteración, de modo que una misma ejecución siempre produce los mismos precios.
 
 Los ingresos del INSE corresponden a valores de 2022. Para trabajar con números más pequeños, el modelo expresa tanto los ingresos como los precios en miles de pesos: por ejemplo, un ingreso de $33{,}2$ representa $33\,200$ pesos mensuales. Para aproximar la cuota se usa una anualidad de cuota fija sobre el 80\% del precio, con tasa nominal anual de 6\% y plazo de 240 meses. Estos parámetros son configurables y no pretenden reproducir un producto hipotecario real. Una vivienda es accesible cuando su cuota no supera la fracción $\rho$ del ingreso del hogar.
 
