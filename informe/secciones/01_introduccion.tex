@@ -1,9 +1,7 @@
 \section{Introducción}
 
-El modelo de Schelling estudia cómo las preferencias individuales sobre el vecindario pueden modificar la distribución espacial de una población. Su resultado central es que decisiones locales moderadas pueden formar agrupamientos marcados a nivel global \cite{schelling1971}.
+La segregación residencial ocurre cuando distintos grupos sociales se distribuyen de forma desigual dentro de una ciudad. Este fenómeno puede surgir por diferencias económicas, por el acceso a la vivienda y por las preferencias de los hogares respecto a su entorno.
 
-En este trabajo los hogares se ubican en una grilla rectangular y se clasifican en tres clases socioeconómicas. Cada hogar evalúa la composición de su vecindario y, cuando no está satisfecho, busca una vivienda vacía que cumpla sus preferencias y su capacidad de pago. Las proporciones sociales se basan en datos agregados de Montevideo, mientras que las ubicaciones se generan de forma sintética.
+El modelo de Schelling permite estudiar cómo decisiones individuales sobre el vecindario pueden modificar la distribución espacial de una población. Aun cuando los hogares aceptan convivir con grupos diferentes, la repetición de muchas decisiones locales puede formar agrupamientos marcados a nivel global \cite{schelling1971}.
 
-La evaluación de vecindarios y la búsqueda de viviendas se repiten para millones de hogares. Para reducir ese costo se implementaron una versión secuencial y una versión híbrida que combina MPI para distribuir franjas de la grilla y OpenMP para repartir el trabajo dentro de cada proceso. Ambas versiones aplican las mismas reglas y producen el mismo resultado para una semilla dada.
-
-El artículo describe el modelo, la generación de las instancias, las implementaciones secuencial y paralela, y la evaluación realizada en equipos de FING. Finalmente se analizan el rendimiento y el cambio espacial producido por la simulación.
+En este trabajo se representa Montevideo mediante una grilla rectangular con hogares de tres clases socioeconómicas. Cada hogar evalúa la composición de su vecindario y, cuando no está satisfecho, busca una vivienda vacía compatible con sus preferencias y su capacidad de pago. Las proporciones sociales se basan en datos agregados de la ciudad, mientras que las ubicaciones se generan de forma sintética. Como estas operaciones se repiten sobre una gran cantidad de hogares, también se estudia el costo de ejecutar la simulación con instancias grandes.
