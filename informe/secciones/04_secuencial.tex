@@ -20,21 +20,19 @@ Cada iteración evalúa satisfacción sobre la ocupación consolidada, actualiza
 
 Cuando una vivienda candidata está cerca de la actual, la satisfacción se calcula sin contar al propio hogar en la vivienda que dejaría libre. Las solicitudes se guardan sin modificar la grilla. Si varios hogares eligen la misma vivienda, se conserva la solicitud del hogar con mayor ingreso; los empates se resuelven de forma reproducible. Al final se liberan las viviendas anteriores y después se ocupan los destinos. Por eso una vivienda liberada no puede utilizarse hasta la iteración siguiente.
 
-Para $H$ hogares, $V$ viviendas vacías y $K$ desplazamientos del vecindario, la referencia exhaustiva tiene costo dominante $O(HVK)$ en el peor caso. El filtrado requiere $O(VK)$ por clase y la construcción de índices es lineal en la grilla. La búsqueda conserva un peor caso lineal en las vacantes compatibles, pero normalmente termina cuando la distancia mínima al próximo anillo supera la del mejor candidato hallado.
+El costo puede expresarse mediante tres cantidades: $H$ es el número de hogares que buscan destino, $V$ es el número de viviendas vacías y $K$ es la cantidad de posiciones que se revisan al evaluar un vecindario. Con radio 2, $K$ es como máximo 24. Una búsqueda directa que pruebe las $V$ viviendas para cada hogar tiene costo $O(HVK)$ en el peor caso. El filtrado previo cuesta $O(VK)$ para cada clase. El índice por bloques no cambia el peor caso, pero normalmente evita revisar las viviendas que están más lejos que el mejor destino ya encontrado.
 
 \subsection{Reproducibilidad y checkpoints}
 
-El generador pseudoaleatorio no mantiene estado mutable. Una mezcla SplitMix64 recibe una clave compuesta por semilla, iteración, identificador de entidad, propósito y número de muestra. Los 53 bits superiores del resultado se convierten a un valor uniforme en el intervalo abierto $(0,1)$. Para el ruido normal se aplica Box--Muller a dos uniformes y luego se trunca el resultado al límite configurado. Separar los propósitos de tipo de celda, ocupación, subestrato, ruido y desempate evita que agregar una muestra a una fase desplace las secuencias de las restantes. Existen vectores de prueba fijos para la función de mezcla.
+Cada valor pseudoaleatorio se calcula a partir de la semilla, la iteración, el identificador del hogar o vivienda y el uso que tendrá el valor. Para realizar esta combinación se utiliza SplitMix64. De esta manera, el resultado no depende del orden en que se procesan los hogares y puede repetirse con distintas cantidades de procesos o hilos. El ruido de los precios se obtiene mediante Box--Muller y se limita al intervalo configurado.
 
-El checkpoint binario guarda firma, versión, próxima iteración, dimensiones, cantidad de hogares y códigos de verificación de la configuración y del estado. También guarda cada campo de las celdas y los hogares. Se escribe primero un archivo temporal y se renombra al finalizar. Al cargarlo se revisan su versión, longitud, reglas de consistencia y códigos de verificación. La cantidad total de iteraciones puede aumentarse al continuar una ejecución.
-
-Cuando se habilitan checkpoints, cada estado se escribe primero en un archivo temporal y se renombra solamente cuando está completo. En las mediciones de rendimiento se desactivan para que la escritura en disco no altere los tiempos.
+El checkpoint binario guarda la próxima iteración, las dimensiones, la configuración, las celdas y los hogares. Se escribe primero en un archivo temporal y se renombra cuando está completo. Al cargarlo se revisa que el archivo no esté incompleto o alterado y que corresponda a la misma configuración. En las mediciones de rendimiento los checkpoints se desactivan para que la escritura en disco no altere los tiempos.
 
 \subsection{Optimizaciones}
 
 Los pesos gaussianos y desplazamientos se calculan una sola vez al iniciar. En cada iteración se revisa una vez si cada vivienda vacía sirve para cada una de las tres clases. Con esos resultados y los siete ingresos base se construye un índice por nivel social que descarta los destinos que no cumplen las reglas sociales o económicas. Si un índice queda vacío, la búsqueda responde de inmediato que no existe un destino. Esto evita recorrer todos los bloques para miles de hogares cuando ninguna vivienda es posible.
 
-La terminación por distancia usa una cota conservadora respecto al exterior de los anillos ya visitados. Así no altera la elección de destino ni sus desempates. Los casos pequeños produjeron el mismo resultado que una búsqueda exhaustiva.
+La búsqueda se detiene cuando todos los bloques que faltan están más lejos que el mejor destino encontrado. Los casos pequeños produjeron el mismo resultado que la búsqueda directa sobre todas las viviendas vacías.
 
 \subsection{Convenciones y simplificaciones}
 
