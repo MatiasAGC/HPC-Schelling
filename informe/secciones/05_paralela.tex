@@ -1,27 +1,29 @@
 \section{Diseño e implementación paralela}
 
-La versión paralela combina procesos MPI con hilos OpenMP \cite{mpi,openmp}. MPI permite repartir el trabajo entre máquinas o procesos, mientras que OpenMP aprovecha varios núcleos dentro de cada proceso.
-
 \subsection{Descomposición con MPI}
 
-La grilla se divide en franjas horizontales contiguas con igual cantidad de filas salvo una diferencia máxima de una. El dueño de una celda se deriva de su fila, sin tablas adicionales. Cada proceso calcula satisfacción, precios y solicitudes únicamente para hogares o celdas de su franja. Mantiene además un halo superior e inferior de ancho $r$ para evaluar vecindarios sobre los límites. Esta primera partición equilibra área y simplifica la comunicación; no garantiza igual cantidad de hogares cuando la ocupación es heterogénea.
+La grilla se divide en franjas horizontales contiguas con igual cantidad de filas, salvo una diferencia máxima de una. Cada proceso queda encargado de una franja y calcula la satisfacción, los precios y las solicitudes de sus hogares y viviendas. Para evaluar un vecindario que cruza un límite, también recibe las $r$ filas más cercanas de la franja vecina. Estas filas auxiliares se denominan halo. La división reparte una cantidad similar de celdas, aunque no garantiza la misma cantidad de hogares si la ocupación es desigual.
 
 Para mantener una versión distribuida sencilla, cada proceso conserva una copia completa de los identificadores, hogares y vacantes compatibles. Sin embargo, solo el dueño de una franja calcula sus resultados. Esta decisión facilita que todos los procesos terminen con el mismo estado, pero aumenta la memoria y la comunicación.
 
-\subsection{Comunicación y migraciones}
+\subsection{Comunicación entre procesos}
 
-Cada proceso calcula la satisfacción y los precios de su franja. Luego, \texttt{MPI\_Allreduce} reúne esos resultados para que todos tengan el mismo estado completo. Las propuestas de mudanza se reúnen de la misma manera y cada proceso resuelve los conflictos en el mismo orden. Al final de la iteración, los procesos vecinos intercambian las filas cercanas al borde mediante \texttt{MPI\_Irecv}, \texttt{MPI\_Isend} y \texttt{MPI\_Waitall}. Como una ejecución debe esperar al proceso más lento, el tiempo informado es el mayor tiempo entre todos los procesos.
+En cada iteración, un proceso calcula solamente los hogares y las viviendas de su franja. Después, todos comparten sus resultados mediante \texttt{MPI\_Allreduce}. Esta operación combina las partes calculadas por cada proceso y deja en todos una copia completa de la satisfacción, los precios y los destinos propuestos. Como todos reciben la misma información, pueden resolver los conflictos y aplicar las mudanzas en el mismo orden.
 
-Una solicitud cuyo origen y destino pertenecen a franjas distintas se contabiliza como remota. La propiedad del hogar cambia implícitamente porque se vuelve a derivar de su nueva celda; no es necesario renumerarlo ni modificar su identificador global.
+Al terminar la iteración, cada proceso también intercambia con sus vecinos las filas que están junto al límite de su franja. Estas filas forman el halo y permiten calcular un vecindario que cruza el borde entre dos franjas.
+
+Una mudanza se considera remota cuando la vivienda actual está en la franja de un proceso y la vivienda elegida está en la franja de otro. El hogar conserva su identificador y no se envía por separado. Como todos los procesos actualizan la misma mudanza en sus copias, en la iteración siguiente la fila de la nueva vivienda determina qué proceso debe calcular ese hogar. La cantidad de mudanzas remotas se registra para medir cuánto trabajo cruza las divisiones de la grilla.
+
+Las operaciones de comunicación requieren que todos los procesos lleguen a la misma etapa. Por eso el tiempo de cada fase se toma del proceso que demoró más.
 
 \subsection{Paralelización local con OpenMP}
 
-Los recorridos de satisfacción, actualización de precios y búsqueda de destinos usan \texttt{omp parallel for} con planificación estática. Cada thread escribe posiciones exclusivas en los arreglos de satisfacción, precios o destinos; las estructuras de modelo, vecindario e índices se leen como una instantánea inmutable durante cada fase. La validez de los precios usa una reducción \texttt{min}, evitando secciones críticas y variables globales mutables.
+Dentro de cada proceso, los hilos se reparten los recorridos de satisfacción, actualización de precios y búsqueda de destinos. La división es estática: cada hilo recibe una parte fija del recorrido. Durante una fase todos leen el mismo estado inicial y cada hilo escribe en posiciones distintas de los arreglos de resultados. De esta manera no es necesario proteger cada escritura con un bloqueo.
 
-Las regiones OpenMP terminan antes de cada operación MPI entre todos los procesos. El programa solicita \texttt{MPI\_THREAD\_FUNNELED} y verifica el nivel provisto, de modo que únicamente el hilo principal llama a MPI. Para los experimentos se fijan \texttt{OMP\_PLACES=cores} y \texttt{OMP\_PROC\_BIND=close}; la cantidad de hilos queda registrada en \texttt{run.json}.
+El trabajo de los hilos termina antes de comenzar la comunicación entre procesos. Solamente el hilo principal realiza las llamadas MPI. Esto evita que varios hilos intenten comunicarse al mismo tiempo y separa con claridad el cálculo local del intercambio de resultados.
 
 \subsection{Corrección y resultados repetibles}
 
-Después de cada iteración se reducen el mínimo y el máximo del hash de estado. Una diferencia detiene la ejecución, detectando divergencias entre procesos en el primer mes donde aparecen. Además, las pruebas de integración exigen el hash secuencial conocido con uno, dos y tres procesos MPI.
+Al final de cada iteración se calcula un código corto a partir de todo el estado de la simulación. Los procesos comparan ese código y detienen la ejecución si alguno obtuvo un estado diferente. Así se puede detectar la primera iteración en la que aparece un error de sincronización.
 
-Las configuraciones de un proceso con cuatro hilos y dos procesos con dos hilos reproducen también el resultado secuencial exacto. La instancia principal vuelve a comprobar esta igualdad al terminar cada configuración.
+También se comparó el estado completo de la versión secuencial con ejecuciones de uno, dos y tres procesos, y con distintas cantidades de hilos. Todas produjeron el mismo resultado para una configuración y semilla dadas.
