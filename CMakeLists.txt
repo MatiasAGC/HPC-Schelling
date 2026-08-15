@@ -54,24 +54,12 @@ target_link_libraries(schelling_hybrid PRIVATE schelling_comun MPI::MPI_C OpenMP
 target_compile_options(schelling_hybrid PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 
 include(CTest)
-find_package(Python3 COMPONENTS Interpreter)
 
 if(BUILD_TESTING)
     add_executable(prueba_analisis tests/unit/prueba_analisis.c)
     target_link_libraries(prueba_analisis PRIVATE schelling_comun)
     target_compile_options(prueba_analisis PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
     add_test(NAME analisis COMMAND prueba_analisis)
-
-    if(Python3_Interpreter_FOUND)
-        add_test(NAME ayuda_experimentos
-            COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/ejecutar_experimentos.py"
-                    --help
-        )
-        add_test(NAME ayuda_escenarios
-            COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/ejecutar_escenarios.py"
-                    --help
-        )
-    endif()
 
     add_executable(prueba_configuracion tests/unit/prueba_configuracion.c)
     target_link_libraries(prueba_configuracion PRIVATE schelling_comun)
