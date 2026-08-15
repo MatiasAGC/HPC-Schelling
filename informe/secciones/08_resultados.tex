@@ -127,9 +127,7 @@ remotas. El desbalance medio fue solamente 1,005, por lo que la diferencia no
 se explica por una mala división del trabajo. El costo proviene principalmente
 del intercambio y de mantener datos globales en ambos procesos.
 
-Después de la iteración 14 casi no quedaba trabajo de búsqueda en esta grilla, por
-lo que los costos fijos tenían demasiado peso. La grilla principal mantiene
-solicitudes activas durante más iteraciones.
+Desde la iteración 14 hasta la 120, \texttt{metrics.csv} registró cero solicitudes y cero mudanzas aceptadas. Esto no significa que todos los hogares estuvieran satisfechos: los hogares restantes no encontraban una vivienda que cumpliera todas las condiciones. En ese tramo la búsqueda terminaba rápidamente y los costos fijos tenían demasiado peso. La grilla principal mantiene solicitudes activas durante más iteraciones.
 
 \subsection{Evaluación con la grilla grande}
 
@@ -141,17 +139,19 @@ todas las configuraciones paralelas terminaron con el mismo estado.
 \centering
 \caption{Escalabilidad fuerte de la grilla principal en la Facultad de Ingeniería}
 \label{tab:resultados-hpc}
-\begin{tabular}{rrrrrr}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{rrrrrrr}
 \toprule
-MPI & OMP & $T$ (s) & $S_p$ & $E_p$ & Desbalance \\
+MPI & OMP & $T$ (s) & $T$ (min) & $S_p$ & $E_p$ & Desbalance \\
 \midrule
--- & -- & 13761,983 & 1,000 & 1,000 & -- \\
-1 & 1 & 13889,969 & 0,991 & 0,991 & 1,000 \\
-1 & 2 & 7981,232 & 1,724 & 0,862 & 1,000 \\
-1 & 4 & 7572,458 & 1,817 & 0,454 & 1,000 \\
-2 & 1 & 8338,180 & 1,650 & 0,825 & 1,000 \\
-2 & 2 & 8263,276 & 1,665 & 0,416 & 1,000 \\
-2 & 4 & 7901,159 & 1,742 & 0,218 & 1,000 \\
+-- & -- & 13761,983 & 229,4 & 1,000 & 1,000 & -- \\
+1 & 1 & 13889,969 & 231,5 & 0,991 & 0,991 & 1,000 \\
+1 & 2 & 7981,232 & 133,0 & 1,724 & 0,862 & 1,000 \\
+1 & 4 & 7572,458 & 126,2 & 1,817 & 0,454 & 1,000 \\
+2 & 1 & 8338,180 & 139,0 & 1,650 & 0,825 & 1,000 \\
+2 & 2 & 8263,276 & 137,7 & 1,665 & 0,416 & 1,000 \\
+2 & 4 & 7901,159 & 131,7 & 1,742 & 0,218 & 1,000 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -192,11 +192,11 @@ ninguna de esas configuraciones superó a $1\times4$.
 
 \subsection{Comportamiento del modelo}
 
-En la primera iteración de la medición preliminar, $291\,147$ de $522\,351$ hogares estaban satisfechos (55,7~\%). Se generaron $222\,341$ solicitudes, de las cuales $28\,258$ fueron aceptadas. En la iteración 14 se alcanzaron $333\,477$ hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Desde ese punto, $188\,874$ hogares permanecieron insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. La cantidad de viviendas vacías se mantuvo; la simulación se estabilizó por la combinación de restricciones.
+En la primera iteración de la medición preliminar, $291\,147$ de $522\,351$ hogares estaban satisfechos (55,7~\%). Se generaron $222\,341$ solicitudes, de las cuales $28\,258$ fueron aceptadas. En la iteración 14 se alcanzaron $333\,477$ hogares satisfechos (63,8~\%) y no se produjo ninguna nueva solicitud. Los registros muestran que esta situación continuó hasta la iteración 120. Quedaron $188\,874$ hogares insatisfechos porque ninguna vivienda vacía cumplía a la vez sus preferencias y su capacidad de pago. La cantidad de viviendas vacías se mantuvo. Por lo tanto, la simulación dejó de producir mudanzas por la combinación de restricciones; no se supone que todos los hogares hayan quedado satisfechos.
 
-La grilla principal mostró una evolución más larga. En la primera iteración estaban satisfechos $4\,056\,562$ hogares, un 54,6\%. En la iteración 30 el valor llegó a 78,1\% y en la 60 a 78,4\%. Al finalizar se mantuvo en 78,4\%, con $5\,824\,126$ hogares satisfechos. Durante las 240 iteraciones se aceptaron $2\,496\,186$ mudanzas.
+La grilla principal mostró una evolución más larga. En la primera iteración estaban satisfechos $4\,056\,562$ hogares, un 54,6\%. En la iteración 30 el valor llegó a 78,1\% y en la 60 a 78,4\%. Al finalizar se mantuvo en 78,4\%, con $5\,824\,126$ hogares satisfechos. Durante las 240 iteraciones se aceptaron $2\,496\,186$ mudanzas. En la última iteración todavía se registraron 14 solicitudes y 8 mudanzas aceptadas. Por eso el porcentaje se había estabilizado al redondearlo, pero la simulación no se había detenido por completo.
 
-La proporción media ponderada de vecinos de la misma clase pasó de 0,437 en el estado inicial a 0,593 en el final. El aumento de 15,6 puntos porcentuales confirma que los hogares quedaron más agrupados por clase. La Fig.~\ref{fig:grillas-hpc} muestra el mismo cambio de forma visual. La grilla inicial presenta una mezcla fina, mientras que en la final aparecen grupos del mismo color más continuos.
+La proporción media ponderada de vecinos de la misma clase pasó de 0,437 en el estado inicial a 0,593 en el final. El aumento de 15,6 puntos porcentuales confirma que los hogares quedaron más agrupados por clase. La Fig.~\ref{fig:grillas-hpc} muestra el mismo cambio de forma visual. La grilla inicial presenta una distribución más mezclada entre las clases, mientras que en la final aparecen grupos del mismo color más continuos.
 
 \begin{figure*}[ht]
 \centering
